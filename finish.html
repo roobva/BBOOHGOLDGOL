@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Felicitaciones - Crédito Preaprobado</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+            background-color: #eee;
+        }
+
+        .confetti-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            z-index: 1000;
+            pointer-events: none;
+        }
+
+        .confetti {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background-color: #f00;
+            border-radius: 50%;
+            opacity: 0;
+            transform-origin: center;
+        }
+
+        @keyframes confetti-fall {
+            0% {
+                transform: translateY(-100vh) rotate(0deg);
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(100vh) rotate(720deg);
+                opacity: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="confetti-container" class="confetti-container"></div>
+
+    <div id="app">
+        <header class="w-full flex items-center justify-center py-16 bg-gradient-to-t from-[#0043a9] to-[#4c7bc7]">
+            <img src="img/logo.png" alt="Logo" class="w-full max-w-[50px] h-auto -mt-4">
+        </header>
+
+        <div class="relative mt-[-1rem] rounded-t-[15px] w-full h-auto bg-gray-200">
+            <div class="w-full box-border p-4">
+                <h2 class="text-xl font-bold text-[#0040a8] text-center mb-4">¡Felicitaciones!</h2>
+
+                <div class="flex flex-col items-center justify-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-20 h-20 text-[#0043a9] mb-4" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                    </svg>
+                    <p class="text-sm text-gray-700 text-center mb-4">
+                        Nos complace informarte que has sido seleccionado para recibir un <b>CRÉDITO LIBRE INVERSIÓN PREAPROBADO</b> con desembolso inmediato.
+                    </p>
+                    <p class="text-sm text-gray-700 text-center mb-4">
+                        🔔 En un plazo máximo de <b>24 horas</b> uno de nuestros asesores se comunicará contigo para confirmar los datos y proceder con la entrega del dinero directamente en tu cuenta.
+                    </p>
+                    <p class="text-sm text-gray-700 text-center mb-6">
+                        💳 Este beneficio exclusivo está diseñado para que dispongas de los recursos que necesites sin trámites extensos, con total rapidez y respaldo de nuestro banco.
+                    </p>
+                </div>
+
+                <a href="https://www.google.com" target="_blank" class="block w-full rounded-2xl text-white bg-[#0043a9] font-bold text-base border-none py-2 px-0 text-center my-4 mx-auto disabled:opacity-70">
+                    Ir al inicio
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const confettiContainer = document.getElementById('confetti-container');
+            const colors = ['#f44336', '#e91e63', '#9c27b0', '#673ab7', '#3f51b5', '#2196f3', '#03a9f4', '#00bcd4', '#009688', '#4caf50', '#8bc34a', '#cddc39', '#ffeb3b', '#ffc107', '#ff9800', '#ff5722'];
+
+            function createConfetti() {
+                const confetti = document.createElement('div');
+                confetti.classList.add('confetti');
+
+                const randomColor = colors[Math.floor(Math.random() * colors.length)];
+                confetti.style.backgroundColor = randomColor;
+
+                const startX = Math.random() * 100 + 'vw';
+                const startY = -10 + 'px';
+                const duration = Math.random() * 2 + 3 + 's'; // 3 a 5 segundos
+                const delay = Math.random() * 2 + 's'; // 0 a 2 segundos
+
+                confetti.style.left = startX;
+                confetti.style.top = startY;
+                confetti.style.animation = `confetti-fall ${duration} ease-in-out ${delay} infinite`;
+
+                confettiContainer.appendChild(confetti);
+
+                // Eliminar el confeti después de que termine una animación
+                setTimeout(() => confetti.remove(), parseFloat(duration) * 1000 + parseFloat(delay) * 1000 + 100);
+            }
+
+            // Crear un confeti cada 100 milisegundos
+            setInterval(createConfetti, 100);
+        });
+    </script>
+</body>
+</html>
