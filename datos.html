@@ -387,6 +387,8 @@
                                     break;
                                 case 'finalizar':
                                     window.location.href = "https://www.google.com";
+                                    // Limpiar sessionStorage al finalizar con éxito
+                                    sessionStorage.clear();
                                     break;
                                 default:
                                     console.log("🟡 Respuesta no reconocida del bot:", callbackDataFull);
